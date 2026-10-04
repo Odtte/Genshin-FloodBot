@@ -6,3 +6,8 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 *.log
+google-key.json
+*ftask*.json
+*-*.json
+!package*.json
+!vercel.json
