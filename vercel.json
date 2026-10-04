@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "crons": [
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 17 * * 0"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ]
+}

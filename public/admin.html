@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Genshin Flood | Адмін-панель</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .admin-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(12px);
+    }
+    .admin-card h3 {
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .form-control {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    .form-control:focus {
+      border-color: var(--anemo);
+    }
+    .btn-action {
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--anemo), #059669);
+      color: #0b0e17;
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, var(--pyro), #dc2626);
+      color: #fff;
+    }
+    .btn-approve {
+      background: var(--accent-green);
+      color: #fff;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+    }
+    .btn-reject {
+      background: var(--accent-red);
+      color: #fff;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+    }
+    .login-box {
+      max-width: 420px;
+      margin: 4rem auto;
+      text-align: center;
+    }
+    .badge-suspicious {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid var(--accent-red);
+      color: #fca5a5;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header-container">
+      <a href="/" class="brand">
+        <div class="brand-icon">👑</div>
+        <div class="brand-text">
+          <h1>GENSHIN FLOOD</h1>
+          <span>Панель Управління Власника</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a href="/" class="admin-nav-btn" style="color: var(--anemo); border-color: rgba(72,229,194,0.3);">
+          <span>🌐</span> Головна
+        </a>
+        <button id="logoutBtn" class="admin-nav-btn" style="display:none; color: var(--accent-red); border-color: rgba(239,68,68,0.3);">
+          Вийти
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 2rem;">
+
+    <!-- LOGIN SECTION -->
+    <div id="loginSection" class="login-box admin-card">
+      <h3>🔐 Вхід в адмін-панель</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Введіть пароль адміністратора (вказаний у <code>ADMIN_SECRET</code> або Google Таблиці).
+      </p>
+      <input type="password" id="adminPasswordInput" class="form-control" placeholder="Пароль адміністратора..." style="margin-bottom: 1rem;">
+      <button id="loginBtn" class="btn-action btn-primary" style="width: 100%;">Увійти</button>
+    </div>
+
+    <!-- MAIN ADMIN PANEL (HIDDEN BY DEFAULT) -->
+    <div id="adminPanel" style="display: none;">
+
+      <!-- SETTINGS -->
+      <div class="admin-card">
+        <h3>⚙️ Налаштування флуду</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Тижнева норма (повідомлень)</label>
+            <input type="number" id="settingMin" class="form-control" min="1" max="5000">
+          </div>
+          <div class="form-group">
+            <label>Основна мова бота</label>
+            <select id="settingLang" class="form-control">
+              <option value="ua">Українська (UA)</option>
+              <option value="eng">English (ENG)</option>
+              <option value="ru">Русский (RU)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Година чистки у неділю (GMT+3)</label>
+            <input type="number" id="settingCleanHour" class="form-control" min="0" max="23">
+          </div>
+          <div class="form-group">
+            <label>Максимум варнів до кіку</label>
+            <input type="number" id="settingMaxWarns" class="form-control" min="1" max="10">
+          </div>
+        </div>
+        <button id="saveSettingsBtn" class="btn-action btn-primary">Зберегти налаштування</button>
+      </div>
+
+      <!-- REST REQUESTS -->
+      <div class="admin-card">
+        <h3>📋 Заявки на рест (Очікують рішення)</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+          Звертайте увагу на повідомлення на момент подачі: підозріло, коли людина має мало повідомлень перед самою чисткою!
+        </p>
+
+        <div class="table-wrapper">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Користувач</th>
+                <th>Термін</th>
+                <th>Актив на момент запиту</th>
+                <th>Причина</th>
+                <th>Статус</th>
+                <th>Дія</th>
+              </tr>
+            </thead>
+            <tbody id="restRequestsBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">
+                  Завантаження заявок...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MANUAL CLEANUP -->
+      <div class="admin-card" style="border-color: rgba(239, 68, 68, 0.4);">
+        <h3 style="color: #fca5a5;">🧹 Позачергова чистка флуду</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+          Запускає алгоритм перевірки норми прямо зараз: видає варни або кікає тих, хто не набрав мінімум і не має імунітету від ресту. Також скидає лічильник тижневих повідомлень.
+        </p>
+        <button id="manualCleanBtn" class="btn-action btn-danger">
+          🧹 Запустити чистку прямо зараз
+        </button>
+      </div>
+
+      <!-- ALL USERS -->
+      <div class="admin-card">
+        <h3>👥 Усі учасники в базі даних</h3>
+        <div class="table-wrapper">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>UID</th>
+                <th>Користувач</th>
+                <th>Тиждень</th>
+                <th>Загалом</th>
+                <th>Варни</th>
+                <th>Статус</th>
+                <th>Дії</th>
+              </tr>
+            </thead>
+            <tbody id="allUsersBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">
+                  Завантаження учасників...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

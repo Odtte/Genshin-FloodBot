@@ -1,0 +1,27 @@
+{
+  "name": "genshin-flood-bot",
+  "version": "1.0.0",
+  "description": "Telegram Clean & Rest Bot for Genshin Impact Flood chat with Google Sheets DB & Web Dashboard for Vercel",
+  "main": "api/webhook.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/local.js",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "keywords": [
+    "telegram-bot",
+    "genshin-impact",
+    "flood-bot",
+    "google-sheets",
+    "vercel",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "google-auth-library": "^9.15.1",
+    "google-spreadsheet": "^4.1.4",
+    "grammy": "^1.35.0"
+  }
+}

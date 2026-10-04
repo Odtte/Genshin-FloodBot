@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Genshin Flood | Панель учасників</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header-container">
+      <a href="/" class="brand">
+        <div class="brand-icon">✨</div>
+        <div class="brand-text">
+          <h1>GENSHIN FLOOD</h1>
+          <span id="headerSubtitle">Система Чисток & Рестів</span>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <!-- Language Switcher -->
+        <div class="lang-selector">
+          <button class="lang-btn active" data-lang="ua">UA</button>
+          <button class="lang-btn" data-lang="eng">ENG</button>
+          <button class="lang-btn" data-lang="ru">RU</button>
+        </div>
+
+        <a href="/admin" class="admin-nav-btn">
+          <span>👑</span>
+          <span id="navAdminText">Адмін</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+
+    <!-- HERO & COUNTDOWN -->
+    <section class="hero">
+      <h2 id="heroTitle">Флуд Геншин Імпакт</h2>
+      <p id="heroDesc">Відстежуйте свою щотижневу норму спілкування, статус імунітету від чисток та рести.</p>
+
+      <div class="countdown-box">
+        <div class="countdown-title" id="countdownLabel">⏳ До недільної чистки:</div>
+        <div class="countdown-timer">
+          <div class="timer-item">
+            <span class="timer-num" id="cdDays">00</span>
+            <span class="timer-label" id="lblDays">Днів</span>
+          </div>
+          <div class="timer-item">
+            <span class="timer-num" id="cdHours">00</span>
+            <span class="timer-label" id="lblHours">Год</span>
+          </div>
+          <div class="timer-item">
+            <span class="timer-num" id="cdMinutes">00</span>
+            <span class="timer-label" id="lblMins">Хв</span>
+          </div>
+          <div class="timer-item">
+            <span class="timer-num" id="cdSeconds">00</span>
+            <span class="timer-label" id="lblSecs">Сек</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS OVERVIEW -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title" id="statMembersLbl">Учасників флуду</span>
+          <span class="stat-icon">👥</span>
+        </div>
+        <div class="stat-value" id="valTotalMembers">—</div>
+        <div class="stat-subtitle" id="statMembersSub">Активні мандрівники</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title" id="statQuotaLbl">Тижнева норма</span>
+          <span class="stat-icon">🎯</span>
+        </div>
+        <div class="stat-value" id="valMinMessages">—</div>
+        <div class="stat-subtitle" id="statQuotaSub">Мінімум для імунітету</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title" id="statWeeklyLbl">Повідомлень за тиждень</span>
+          <span class="stat-icon">💬</span>
+        </div>
+        <div class="stat-value" id="valWeeklyTotal">—</div>
+        <div class="stat-subtitle" id="statWeeklySub">Загальний флуд</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title" id="statRestLbl">На ресті (відпустка)</span>
+          <span class="stat-icon">🏖️</span>
+        </div>
+        <div class="stat-value" id="valResting">—</div>
+        <div class="stat-subtitle" id="statRestSub">Мають імунітет</div>
+      </div>
+    </section>
+
+    <!-- USER SEARCH -->
+    <section class="search-section">
+      <div class="search-bar">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="Введіть свій UID, @username або ID..."
+        >
+        <button id="searchBtn" class="search-btn">Знайти картку</button>
+      </div>
+    </section>
+
+    <!-- MEMBER PROFILE CARD (GENSHIN CARD STYLE) -->
+    <div id="profileWrapper" class="profile-card-wrapper">
+      <div class="genshin-card">
+        <div class="card-top">
+          <div class="card-avatar" id="cardAvatar">✦</div>
+          <div class="card-info">
+            <div class="card-name" id="cardName">Мандрівник</div>
+            <div class="card-uid" id="cardUid">UID: 700000000</div>
+          </div>
+          <div class="card-rank-badge" id="cardRank">Ранг #—</div>
+        </div>
+
+        <!-- QUOTA PROGRESS -->
+        <div class="quota-box">
+          <div class="quota-header">
+            <span class="quota-label" id="cardQuotaLabel">Прогрес щотижневої норми</span>
+            <span class="quota-count" id="cardQuotaCount">0 / 50 (0%)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="cardProgressFill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- METRICS -->
+        <div class="card-metrics">
+          <div class="metric-item">
+            <div class="metric-label" id="cardTotalLbl">Всього повідомлень</div>
+            <div class="metric-val" id="cardTotalVal">0</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label" id="cardWarnsLbl">Попередження (варни)</div>
+            <div class="metric-val" id="cardWarnsVal" style="color: var(--accent-gold);">0 / 3</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label" id="cardStatusLbl">Статус</div>
+            <div class="metric-val" id="cardStatusVal">
+              <span class="status-badge badge-active">В строю</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="cardRestDetails" style="margin-top: 1rem; font-size: 0.85rem; color: var(--hydro); display: none;">
+          🏖️ <strong>Рест до:</strong> <span id="cardRestDate">—</span> | <strong>Причина:</strong> <span id="cardRestReason">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD SECTION -->
+    <section class="leaderboard-section">
+      <div class="section-head">
+        <h3 id="boardTitle">Таблиця лідерів флуду</h3>
+        <div class="tab-group">
+          <button class="tab-btn active" id="tabWeekly" data-tab="weekly">Цей тиждень</button>
+          <button class="tab-btn" id="tabAllTime" data-tab="alltime">За весь час</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th id="thUser">Користувач</th>
+              <th id="thWeekly">Цього тижня</th>
+              <th id="thTotal">Загалом</th>
+              <th id="thQuota">Виконання</th>
+              <th id="thStatus">Статус</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                Завантаження даних флуду...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <p>Genshin Flood Bot &copy; 2026. Розроблено для комфортного спілкування та чистоти чатів.</p>
+      <p style="margin-top: 0.5rem;">Telegram Webhook на Vercel + Google Sheets База Даних</p>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
