@@ -45,12 +45,16 @@ async function ensureSheets(doc) {
         'telegram_id',
         'username',
         'first_name',
+        'daily_messages',
         'weekly_messages',
+        'monthly_messages',
         'total_messages',
         'warns',
         'status',
         'rest_until',
         'rest_reason',
+        'last_daily_date',
+        'last_monthly_date',
         'last_active'
       ]
     });
@@ -254,17 +258,24 @@ export async function getOrCreateUser(tgUser) {
   const startUid = 700000001;
   const newUid = startUid + rows.length;
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const monthStr = new Date().toISOString().slice(0, 7);
+
   const newUserObj = {
     uid: String(newUid),
     telegram_id: idStr,
     username: tgUser.username ? `@${tgUser.username}` : '',
     first_name: tgUser.first_name || '',
+    daily_messages: '0',
     weekly_messages: '0',
+    monthly_messages: '0',
     total_messages: '0',
     warns: '0',
     status: 'active',
     rest_until: '',
     rest_reason: '',
+    last_daily_date: todayStr,
+    last_monthly_date: monthStr,
     last_active: new Date().toISOString()
   };
 
@@ -290,6 +301,25 @@ export async function incrementUserMessage(tgUser) {
   }
 
   if (row) {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const monthStr = new Date().toISOString().slice(0, 7);
+
+    let daily = parseInt(row.get('daily_messages'), 10) || 0;
+    if (row.get('last_daily_date') !== todayStr) {
+      daily = 1;
+      row.set('last_daily_date', todayStr);
+    } else {
+      daily += 1;
+    }
+
+    let monthly = parseInt(row.get('monthly_messages'), 10) || 0;
+    if (row.get('last_monthly_date') !== monthStr) {
+      monthly = 1;
+      row.set('last_monthly_date', monthStr);
+    } else {
+      monthly += 1;
+    }
+
     const weekly = (parseInt(row.get('weekly_messages'), 10) || 0) + 1;
     const total = (parseInt(row.get('total_messages'), 10) || 0) + 1;
     
@@ -302,7 +332,9 @@ export async function incrementUserMessage(tgUser) {
       row.set('rest_reason', '');
     }
 
+    row.set('daily_messages', String(daily));
     row.set('weekly_messages', String(weekly));
+    row.set('monthly_messages', String(monthly));
     row.set('total_messages', String(total));
     row.set('status', currentStatus);
     row.set('last_active', new Date().toISOString());
@@ -426,5 +458,19 @@ function rowToObject(row) {
   for (const [k, v] of Object.entries(rawObj)) {
     obj[k] = v;
   }
+
+  // Normalize daily and monthly counts for user objects if dates are stale
+  if (obj.uid && obj.telegram_id) {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const monthStr = new Date().toISOString().slice(0, 7);
+
+    if (obj.last_daily_date !== todayStr) {
+      obj.daily_messages = '0';
+    }
+    if (obj.last_monthly_date !== monthStr) {
+      obj.monthly_messages = '0';
+    }
+  }
+
   return obj;
 }

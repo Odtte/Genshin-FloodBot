@@ -55,7 +55,9 @@ export default async function handler(req, res) {
           telegram_id: targetUser.telegram_id,
           username: targetUser.username,
           first_name: targetUser.first_name,
+          daily_messages: parseInt(targetUser.daily_messages, 10) || 0,
           weekly_messages: weekly,
+          monthly_messages: parseInt(targetUser.monthly_messages, 10) || 0,
           total_messages: parseInt(targetUser.total_messages, 10) || 0,
           warns: parseInt(targetUser.warns, 10) || 0,
           max_warns: parseInt(settings.max_warns, 10) || 3,
@@ -78,7 +80,9 @@ export default async function handler(req, res) {
     const sanitizedUsers = allUsers
       .filter(u => u.status !== 'kicked')
       .map(u => {
+        const daily = parseInt(u.daily_messages, 10) || 0;
         const weekly = parseInt(u.weekly_messages, 10) || 0;
+        const monthly = parseInt(u.monthly_messages, 10) || 0;
         const total = parseInt(u.total_messages, 10) || 0;
         const warns = parseInt(u.warns, 10) || 0;
         const isRest = u.rest_until && new Date(u.rest_until) > now;
@@ -92,7 +96,9 @@ export default async function handler(req, res) {
           telegram_id: u.telegram_id,
           username: u.username,
           first_name: u.first_name,
+          daily_messages: daily,
           weekly_messages: weekly,
+          monthly_messages: monthly,
           total_messages: total,
           warns,
           status: isRest ? 'rest' : u.status,

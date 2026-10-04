@@ -22,7 +22,10 @@ const i18n = {
     searchPlaceholder: "Введіть свій UID, @username або ID...",
     searchBtn: "Знайти картку",
     cardQuotaLabel: "Прогрес щотижневої норми",
-    cardTotalLbl: "Всього повідомлень",
+    cardDailyLbl: "☀️ Сьогодні",
+    cardWeeklyLbl: "📅 Цей тиждень",
+    cardMonthlyLbl: "🌙 Цей місяць",
+    cardTotalLbl: "🏆 За весь час",
     cardWarnsLbl: "Попередження (варни)",
     cardStatusLbl: "Статус",
     boardTitle: "Таблиця лідерів флуду",
@@ -60,7 +63,10 @@ const i18n = {
     searchPlaceholder: "Enter your UID, @username or ID...",
     searchBtn: "Find Card",
     cardQuotaLabel: "Weekly Quota Progress",
-    cardTotalLbl: "Total Messages",
+    cardDailyLbl: "☀️ Today",
+    cardWeeklyLbl: "📅 This Week",
+    cardMonthlyLbl: "🌙 This Month",
+    cardTotalLbl: "🏆 All Time",
     cardWarnsLbl: "Warnings (Warns)",
     cardStatusLbl: "Status",
     boardTitle: "Flood Leaderboard",
@@ -98,7 +104,10 @@ const i18n = {
     searchPlaceholder: "Введите свой UID, @username или ID...",
     searchBtn: "Найти карточку",
     cardQuotaLabel: "Прогресс недельной нормы",
-    cardTotalLbl: "Всего сообщений",
+    cardDailyLbl: "☀️ Сегодня",
+    cardWeeklyLbl: "📅 Эта неделя",
+    cardMonthlyLbl: "🌙 Этот месяц",
+    cardTotalLbl: "🏆 Всё время",
     cardWarnsLbl: "Предупреждения (варны)",
     cardStatusLbl: "Статус",
     boardTitle: "Таблица лидеров флуда",
@@ -373,7 +382,10 @@ function displayProfileCard(user) {
     fill.classList.remove('warning');
   }
 
-  // Metrics
+  // 4 Timeframe Metrics
+  document.getElementById('cardDailyVal').innerText = user.daily_messages || 0;
+  document.getElementById('cardWeeklyVal').innerText = user.weekly_messages || 0;
+  document.getElementById('cardMonthlyVal').innerText = user.monthly_messages || 0;
   document.getElementById('cardTotalVal').innerText = user.total_messages || 0;
   document.getElementById('cardWarnsVal').innerText = `${user.warns || 0} / ${user.max_warns || 3}`;
 

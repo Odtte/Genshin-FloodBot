@@ -144,21 +144,34 @@
           </div>
         </div>
 
-        <!-- METRICS -->
-        <div class="card-metrics">
+        <!-- 4 TIMEFRAMES ACTIVITY GRID -->
+        <div class="card-metrics" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 1rem;">
           <div class="metric-item">
-            <div class="metric-label" id="cardTotalLbl">Всього повідомлень</div>
-            <div class="metric-val" id="cardTotalVal">0</div>
+            <div class="metric-label" id="cardDailyLbl">☀️ Сьогодні</div>
+            <div class="metric-val" id="cardDailyVal">0</div>
           </div>
           <div class="metric-item">
-            <div class="metric-label" id="cardWarnsLbl">Попередження (варни)</div>
-            <div class="metric-val" id="cardWarnsVal" style="color: var(--accent-gold);">0 / 3</div>
+            <div class="metric-label" id="cardWeeklyLbl">📅 Цей тиждень</div>
+            <div class="metric-val" id="cardWeeklyVal" style="color: var(--anemo);">0</div>
           </div>
           <div class="metric-item">
-            <div class="metric-label" id="cardStatusLbl">Статус</div>
-            <div class="metric-val" id="cardStatusVal">
-              <span class="status-badge badge-active">В строю</span>
-            </div>
+            <div class="metric-label" id="cardMonthlyLbl">🌙 Цей місяць</div>
+            <div class="metric-val" id="cardMonthlyVal">0</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-label" id="cardTotalLbl">🏆 За весь час</div>
+            <div class="metric-val" id="cardTotalVal" style="color: var(--accent-gold);">0</div>
+          </div>
+        </div>
+
+        <!-- STATUS & WARNS ROW -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(11, 14, 23, 0.4); border: 1px solid var(--border-color); padding: 0.75rem 1.25rem; border-radius: 12px;">
+          <div>
+            <span style="font-size: 0.8rem; color: var(--text-dim);" id="cardWarnsLbl">Попередження:</span>
+            <strong id="cardWarnsVal" style="color: var(--accent-gold); margin-left: 0.35rem;">0 / 3</strong>
+          </div>
+          <div id="cardStatusVal">
+            <span class="status-badge badge-active">В строю</span>
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import { InlineKeyboard } from 'grammy';
+import { InlineKeyboard, InputFile } from 'grammy';
 import {
   getSettings,
   updateSetting,
@@ -13,6 +13,7 @@ import {
 import { t } from '../i18n.js';
 import { parseRestDuration, formatDurationText, formatDateReadable } from '../../services/rest.js';
 import { runCleanup } from '../../services/cleanup.js';
+import { renderCardPng } from '../../services/card.js';
 import { config } from '../../config.js';
 
 /**
@@ -91,6 +92,128 @@ export function registerCommands(bot) {
       }),
       { parse_mode: 'Markdown' }
     );
+  });
+
+  // --- /whoiam /whoami (Genshin Traveler Passport with Image & Metrics) ---
+  bot.command(['whoiam', 'whoami'], async (ctx) => {
+    const settings = await getSettings();
+    const lang = settings.language || 'ua';
+
+    let targetTelegramId = ctx.from.id;
+    let targetTgUser = ctx.from;
+
+    // Check if replied to another message
+    if (ctx.message?.reply_to_message?.from && !ctx.message.reply_to_message.from.is_bot) {
+      targetTelegramId = ctx.message.reply_to_message.from.id;
+      targetTgUser = ctx.message.reply_to_message.from;
+    }
+
+    // Check if passed argument like @username or UID
+    const arg = (ctx.match || '').trim();
+    let user = null;
+
+    if (arg) {
+      const all = await getAllUsers();
+      if (arg.startsWith('@')) {
+        const cleanName = arg.toLowerCase();
+        user = all.find((u) => (u.username || '').toLowerCase() === cleanName);
+      } else if (!isNaN(Number(arg))) {
+        user = all.find((u) => String(u.uid) === arg || String(u.telegram_id) === arg);
+      }
+    }
+
+    if (!user) {
+      user = await getUser(targetTelegramId);
+    }
+    if (!user && targetTgUser) {
+      user = await getOrCreateUser(targetTgUser);
+    }
+
+    if (!user) {
+      return ctx.reply(t(lang, 'user_not_found'));
+    }
+
+    // Calculate ranking in chat
+    const allUsers = await getAllUsers();
+    const activeSorted = allUsers
+      .filter((u) => u.status !== 'kicked')
+      .sort((a, b) => (parseInt(b.weekly_messages, 10) || 0) - (parseInt(a.weekly_messages, 10) || 0));
+
+    const rankIndex = activeSorted.findIndex((u) => String(u.telegram_id) === String(user.telegram_id));
+    const rank = rankIndex >= 0 ? rankIndex + 1 : activeSorted.length;
+
+    const min = settings.min_messages || 50;
+    const daily = parseInt(user.daily_messages, 10) || 0;
+    const weekly = parseInt(user.weekly_messages, 10) || 0;
+    const monthly = parseInt(user.monthly_messages, 10) || 0;
+    const total = parseInt(user.total_messages, 10) || 0;
+    const percent = Math.min(100, Math.round((weekly / min) * 100));
+
+    let statusText = t(lang, 'status_active');
+    const now = new Date();
+    if (user.rest_until && new Date(user.rest_until) > now) {
+      statusText = t(lang, 'status_rest', {
+        date: formatDateReadable(user.rest_until),
+        reason: user.rest_reason || '—'
+      });
+    } else if (user.status === 'warned') {
+      statusText = t(lang, 'status_warned');
+    } else if (user.status === 'kicked') {
+      statusText = t(lang, 'status_kicked');
+    }
+
+    const quotaStatus = weekly >= min ? t(lang, 'quota_met') : t(lang, 'quota_needed');
+    const dashUrl = config.appUrl ? `${config.appUrl}/?id=${user.telegram_id}` : '#';
+
+    const caption = t(lang, 'whoiam_caption', {
+      name: user.first_name || 'Мандрівник',
+      username: user.username || '—',
+      uid: user.uid,
+      rank,
+      daily,
+      weekly,
+      min,
+      percent,
+      quotaStatus,
+      monthly,
+      total,
+      warns: user.warns || '0',
+      maxWarns: settings.max_warns || 3,
+      statusText,
+      url: dashUrl
+    });
+
+    try {
+      // Generate Traveler Passport PNG image
+      const pngBuffer = await renderCardPng({
+        name: user.first_name || 'Traveler',
+        username: user.username || '',
+        uid: user.uid,
+        daily,
+        weekly,
+        monthly,
+        total,
+        quotaMin: min,
+        quotaPercent: percent,
+        warns: parseInt(user.warns, 10) || 0,
+        maxWarns: settings.max_warns || 3,
+        status: (user.rest_until && new Date(user.rest_until) > now) ? 'rest' : user.status,
+        restUntil: user.rest_until,
+        rank
+      });
+
+      await ctx.replyWithPhoto(new InputFile(pngBuffer, `traveler_${user.uid}.png`), {
+        caption,
+        parse_mode: 'Markdown'
+      });
+    } catch (err) {
+      console.error('Error generating card image:', err);
+      // Fallback to text if image generation fails
+      await ctx.reply(caption, {
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true
+      });
+    }
   });
 
   // --- /stats /profile ---

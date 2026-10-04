@@ -11,6 +11,7 @@ export const translations = {
     // Help
     help: `📜 **Список команд флуд-бота:**\n\n` +
           `👤 **Для учасників:**\n` +
+          `• \`/whoiam\` — паспорт мандрівника (картинка та статистика: день/тиждень/місяць/весь час)\n` +
           `• \`/stats\` (або \`/profile\`) — подивитись свою картку активності\n` +
           `• \`/rest <кількість><d/w/m> <причина>\` — подати заявку на рест (напр. \`/rest 7d екзамени\`)\n` +
           `• \`/top\` — таблиця лідерів флуду\n` +
@@ -23,6 +24,21 @@ export const translations = {
           `• \`/warn <@юзер|ID> [причина]\` — видати попередження\n` +
           `• \`/unwarn <@юзер|ID>\` — зняти попередження\n` +
           `• \`/kick <@юзер|ID>\` — виключити з флуду`,
+
+    // Whoiam Passport
+    whoiam_caption: `📇 **Паспорт мандрівника флуду**\n\n` +
+                    `👤 **Користувач:** {name} ({username})\n` +
+                    `🆔 **UID:** \`{uid}\` | 🏅 **Ранг:** #{rank}\n\n` +
+                    `📊 **Статистика повідомлень:**\n` +
+                    `• ☀️ **За сьогодні:** {daily} пов.\n` +
+                    `• 📅 **За цей тиждень:** {weekly} / {min} пов. ({percent}% {quotaStatus})\n` +
+                    `• 🌙 **За цей місяць:** {monthly} пов.\n` +
+                    `• 🏆 **За весь час:** {total} пов.\n\n` +
+                    `⚠️ **Варни:** {warns}/{maxWarns}\n` +
+                    `🛡️ **Статус:** {statusText}\n\n` +
+                    `🌐 [Відкрити у веб-дашборді]({url})`,
+    quota_met: `✅ Норму виконано`,
+    quota_needed: `⏳ Потрібно добрати`,
 
     // Profile / Stats
     stats_card: `📇 **Картка учасника | Флуд**\n\n` +
@@ -98,6 +114,7 @@ export const translations = {
     // Help
     help: `📜 **Flood Bot Command List:**\n\n` +
           `👤 **For Members:**\n` +
+          `• \`/whoiam\` — traveler passport (photo card & stats: day/week/month/all-time)\n` +
           `• \`/stats\` (or \`/profile\`) — view your activity card\n` +
           `• \`/rest <duration><d/w/m> <reason>\` — request a rest (e.g. \`/rest 7d exams\`)\n` +
           `• \`/top\` — chat leaderboard\n` +
@@ -110,6 +127,21 @@ export const translations = {
           `• \`/warn <@user|ID> [reason]\` — issue a warning\n` +
           `• \`/unwarn <@user|ID>\` — remove a warning\n` +
           `• \`/kick <@user|ID>\` — kick from chat`,
+
+    // Whoiam Passport
+    whoiam_caption: `📇 **Flood Traveler Passport**\n\n` +
+                    `👤 **User:** {name} ({username})\n` +
+                    `🆔 **UID:** \`{uid}\` | 🏅 **Rank:** #{rank}\n\n` +
+                    `📊 **Message Statistics:**\n` +
+                    `• ☀️ **Today:** {daily} msgs\n` +
+                    `• 📅 **This Week:** {weekly} / {min} msgs ({percent}% {quotaStatus})\n` +
+                    `• 🌙 **This Month:** {monthly} msgs\n` +
+                    `• 🏆 **All Time:** {total} msgs\n\n` +
+                    `⚠️ **Warns:** {warns}/{maxWarns}\n` +
+                    `🛡️ **Status:** {statusText}\n\n` +
+                    `🌐 [Open Web Dashboard]({url})`,
+    quota_met: `✅ Quota Met`,
+    quota_needed: `⏳ Need more`,
 
     // Profile / Stats
     stats_card: `📇 **Member Card | Flood**\n\n` +
@@ -185,6 +217,7 @@ export const translations = {
     // Help
     help: `📜 **Список команд флуд-бота:**\n\n` +
           `👤 **Для участников:**\n` +
+          `• \`/whoiam\` — паспорт путешественника (картинка и статистика: день/неделя/месяц/всё время)\n` +
           `• \`/stats\` (или \`/profile\`) — посмотреть свою карточку активности\n` +
           `• \`/rest <срок><d/w/m> <причина>\` — подать заявку на рест (напр. \`/rest 7d сессия\`)\n` +
           `• \`/top\` — таблица лидеров флуда\n` +
@@ -197,6 +230,21 @@ export const translations = {
           `• \`/warn <@юзер|ID> [причина]\` — выдать варн\n` +
           `• \`/unwarn <@юзер|ID>\` — снять варн\n` +
           `• \`/kick <@юзер|ID>\` — исключить из чата`,
+
+    // Whoiam Passport
+    whoiam_caption: `📇 **Паспорт путешественника флуда**\n\n` +
+                    `👤 **Пользователь:** {name} ({username})\n` +
+                    `🆔 **UID:** \`{uid}\` | 🏅 **Ранг:** #{rank}\n\n` +
+                    `📊 **Статистика сообщений:**\n` +
+                    `• ☀️ **За сегодня:** {daily} сообщ.\n` +
+                    `• 📅 **За эту неделю:** {weekly} / {min} сообщ. ({percent}% {quotaStatus})\n` +
+                    `• 🌙 **За этот месяц:** {monthly} сообщ.\n` +
+                    `• 🏆 **За всё время:** {total} сообщ.\n\n` +
+                    `⚠️ **Варны:** {warns}/{maxWarns}\n` +
+                    `🛡️ **Статус:** {statusText}\n\n` +
+                    `🌐 [Открыть в веб-дашборде]({url})`,
+    quota_met: `✅ Норма выполнена`,
+    quota_needed: `⏳ Нужно добрать`,
 
     // Profile / Stats
     stats_card: `📇 **Карточка участника | Флуд**\n\n` +
