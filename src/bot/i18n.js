@@ -19,7 +19,7 @@ export const translations = {
           `👑 **Для адміністрації:**\n` +
           `• \`/setup\` — прив'язати бота до цієї групи\n` +
           `• \`/clean\` — провести позачергову ручну чистку\n` +
-          `• \`/setmin <число>\` — встановити тижневу норму (напр. \`/setmin 100\`)\n` +
+          `• \`/norma [число]\` (або \`/setmin\`) — переглянути чи встановити норму повідомлень (кнопками чи числом)\n` +
           `• \`/setlang <ua|eng|ru>\` — змінити мову бота\n` +
           `• \`/warn <@юзер|ID> [причина]\` — видати попередження\n` +
           `• \`/unwarn <@юзер|ID>\` — зняти попередження\n` +
@@ -94,7 +94,8 @@ export const translations = {
     // Settings
     lang_changed: `🌐 Мову бота успішно змінено на **Українську**!`,
     min_changed: `⚙️ Тижневу норму повідомлень змінено на: **{min}** пов.`,
-    invalid_number: `⚠️ Вкажіть коректне число! Наприклад: \`/setmin 100\``,
+    quota_select_title: `🎯 **Налаштування тижневої норми флуду**\n\nПоточна норма: **{min}** пов./тиждень.\n\nОберіть нове значення кнопками або вкажіть довільне: \`/norma <число>\``,
+    invalid_number: `⚠️ Вкажіть коректне число! Наприклад: \`/norma 100\``,
     dashboard_link: `🌐 **Веб-дашборд флуду:**\n{url}\n\nТут ви можете дивитись свій прогрес, топ учасників та статус рестів.`,
     user_not_found: `⚠️ Користувача не знайдено в базі даних.`,
     warn_given: `⚠️ Адміністратор {admin} видав варн користувачу {mention} ({warns}/{maxWarns}).\nПричина: {reason}`,
@@ -122,7 +123,7 @@ export const translations = {
           `👑 **For Administrators:**\n` +
           `• \`/setup\` — bind bot to this group\n` +
           `• \`/clean\` — trigger manual cleanup\n` +
-          `• \`/setmin <number>\` — set weekly message quota (e.g. \`/setmin 100\`)\n` +
+          `• \`/norma [number]\` (or \`/setmin\`) — view or set weekly quota (buttons or number)\n` +
           `• \`/setlang <ua|eng|ru>\` — change bot language\n` +
           `• \`/warn <@user|ID> [reason]\` — issue a warning\n` +
           `• \`/unwarn <@user|ID>\` — remove a warning\n` +
@@ -197,7 +198,8 @@ export const translations = {
     // Settings
     lang_changed: `🌐 Bot language successfully changed to **English**!`,
     min_changed: `⚙️ Weekly message quota updated to: **{min}** msgs.`,
-    invalid_number: `⚠️ Please specify a valid number! Example: \`/setmin 100\``,
+    quota_select_title: `🎯 **Flood Weekly Quota Settings**\n\nCurrent quota: **{min}** msgs/week.\n\nSelect a new quota using buttons below or type: \`/norma <number>\``,
+    invalid_number: `⚠️ Please specify a valid number! Example: \`/norma 100\``,
     dashboard_link: `🌐 **Flood Web Dashboard:**\n{url}\n\nCheck your progress, leaderboard, and rest status.`,
     user_not_found: `⚠️ User not found in database.`,
     warn_given: `⚠️ Admin {admin} warned user {mention} ({warns}/{maxWarns}).\nReason: {reason}`,
@@ -225,7 +227,7 @@ export const translations = {
           `👑 **Для администрации:**\n` +
           `• \`/setup\` — привязать бота к этой группе\n` +
           `• \`/clean\` — запустить ручную чистку\n` +
-          `• \`/setmin <число>\` — установить недельную норму (напр. \`/setmin 100\`)\n` +
+          `• \`/norma [число]\` (или \`/setmin\`) — посмотреть или установить норму сообщений (кнопками или числом)\n` +
           `• \`/setlang <ua|eng|ru>\` — сменить язык бота\n` +
           `• \`/warn <@юзер|ID> [причина]\` — выдать варн\n` +
           `• \`/unwarn <@юзер|ID>\` — снять варн\n` +
@@ -300,7 +302,8 @@ export const translations = {
     // Settings
     lang_changed: `🌐 Язык бота успешно изменен на **Русский**!`,
     min_changed: `⚙️ Недельная норма сообщений изменена на: **{min}** сообщ.`,
-    invalid_number: `⚠️ Укажите корректное число! Например: \`/setmin 100\``,
+    quota_select_title: `🎯 **Настройка недельной нормы флуда**\n\nТекущая норма: **{min}** сообщ./неделю.\n\nВыберите новое значение кнопками или укажите любое: \`/norma <число>\``,
+    invalid_number: `⚠️ Укажите корректное число! Например: \`/norma 100\``,
     dashboard_link: `🌐 **Веб-дашборд флуда:**\n{url}\n\nЗдесь можно смотреть свой прогресс, топ участников и статус рестов.`,
     user_not_found: `⚠️ Пользователь не найден в базе данных.`,
     warn_given: `⚠️ Администратор {admin} выдал варн пользователю {mention} ({warns}/{maxWarns}).\nПричина: {reason}`,

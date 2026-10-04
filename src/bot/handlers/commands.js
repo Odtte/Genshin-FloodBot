@@ -407,8 +407,8 @@ export function registerCommands(bot) {
     await runCleanup(bot);
   });
 
-  // --- /setmin <number> ---
-  bot.command('setmin', async (ctx) => {
+  // --- /setmin /norma /quota /setquota ---
+  bot.command(['setmin', 'norma', 'quota', 'setquota'], async (ctx) => {
     const settings = await getSettings();
     const lang = settings.language || 'ua';
 
@@ -417,13 +417,37 @@ export function registerCommands(bot) {
       return ctx.reply(t(lang, 'only_admins'));
     }
 
-    const val = parseInt(ctx.match?.trim(), 10);
-    if (isNaN(val) || val <= 0) {
-      return ctx.reply(t(lang, 'invalid_number'), { parse_mode: 'Markdown' });
+    const arg = ctx.match?.trim();
+
+    // If number is provided: update directly
+    if (arg) {
+      const val = parseInt(arg, 10);
+      if (isNaN(val) || val <= 0) {
+        return ctx.reply(t(lang, 'invalid_number'), { parse_mode: 'Markdown' });
+      }
+
+      await updateSetting('min_messages', val);
+      return ctx.reply(t(lang, 'min_changed', { min: val }), { parse_mode: 'Markdown' });
     }
 
-    await updateSetting('min_messages', val);
-    await ctx.reply(t(lang, 'min_changed', { min: val }), { parse_mode: 'Markdown' });
+    // If no argument: show current quota and quick interactive buttons!
+    const currentMin = settings.min_messages || 50;
+    const keyboard = new InlineKeyboard()
+      .text('25', 'set_quota:25')
+      .text('50', 'set_quota:50')
+      .text('100', 'set_quota:100')
+      .row()
+      .text('150', 'set_quota:150')
+      .text('200', 'set_quota:200')
+      .text('500', 'set_quota:500');
+
+    await ctx.reply(
+      t(lang, 'quota_select_title', { min: currentMin }),
+      {
+        parse_mode: 'Markdown',
+        reply_markup: keyboard
+      }
+    );
   });
 
   // --- /setlang <ua|eng|ru> ---

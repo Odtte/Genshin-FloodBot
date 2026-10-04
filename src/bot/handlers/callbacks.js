@@ -1,5 +1,6 @@
 import {
   getSettings,
+  updateSetting,
   getRestRequest,
   updateRestRequest,
   updateUser,
@@ -16,6 +17,37 @@ import { isChatAdmin } from './commands.js';
 export function registerCallbacks(bot) {
   bot.on('callback_query:data', async (ctx) => {
     const data = ctx.callbackQuery.data;
+
+    // Check if it's a quota setting button callback
+    if (data.startsWith('set_quota:')) {
+      const settings = await getSettings();
+      const lang = settings.language || 'ua';
+
+      const admin = await isChatAdmin(ctx);
+      if (!admin && String(ctx.from.id) !== String(settings.owner_id)) {
+        return ctx.answerCallbackQuery({
+          text: t(lang, 'only_admins'),
+          show_alert: true
+        });
+      }
+
+      const val = parseInt(data.split(':')[1], 10);
+      if (val && val > 0) {
+        await updateSetting('min_messages', val);
+        await ctx.answerCallbackQuery({ text: `✅ Норму встановлено: ${val}` });
+
+        const adminName = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
+        try {
+          await ctx.editMessageText(
+            `${t(lang, 'min_changed', { min: val })}\n👤 Встановив(ла): ${adminName}`,
+            { parse_mode: 'Markdown' }
+          );
+        } catch (err) {
+          console.error('Error editing quota message:', err.message);
+        }
+      }
+      return;
+    }
 
     // Check if it's a rest approval/rejection callback
     if (!data.startsWith('rest_app:') && !data.startsWith('rest_rej:')) {
