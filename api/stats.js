@@ -115,15 +115,22 @@ export default async function handler(req, res) {
     const allTimeTop = [...sanitizedUsers]
       .sort((a, b) => b.total_messages - a.total_messages);
 
-    // Calculate next Sunday clean time
-    const nextClean = new Date();
-    nextClean.setUTCDate(nextClean.getUTCDate() + ((7 - nextClean.getUTCDay()) % 7 || 7));
-    nextClean.setUTCHours(17, 0, 0, 0); // 17:00 UTC = 20:00 GMT+3
+    // Next Sunday cleanup at 17:00 UTC (20:00 GMT+3), matching the cron in vercel.json.
+    // If today is Sunday and the cleanup hasn't happened yet, it's today.
+    const now2 = new Date();
+    const nextClean = new Date(now2);
+    nextClean.setUTCHours(17, 0, 0, 0);
+    const daysUntilSunday = (7 - now2.getUTCDay()) % 7;
+    nextClean.setUTCDate(now2.getUTCDate() + daysUntilSunday);
+    if (nextClean <= now2) {
+      nextClean.setUTCDate(nextClean.getUTCDate() + 7);
+    }
 
     return res.status(200).json({
       chat: {
         bound: Boolean(settings.chat_id),
         min_messages: minMessages,
+        max_warns: parseInt(settings.max_warns, 10) || 3,
         clean_day: settings.clean_day,
         clean_hour: settings.clean_hour,
         language: settings.language || 'ua',

@@ -3,234 +3,307 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Genshin Flood | Адмін-панель</title>
-  <link rel="stylesheet" href="./css/style.css">
+  <title>Genshin Flood — Адмін-панель</title>
+  <meta name="description" content="Управління флуд-чатом Genshin Impact: налаштування норми, розгляд рестів та ручна чистка.">
+  <meta name="theme-color" content="#0a0e1a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    .admin-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      backdrop-filter: blur(12px);
-    }
-    .admin-card h3 {
-      margin-bottom: 1rem;
-      font-size: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 1.25rem;
-    }
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 0.4rem;
-    }
-    .form-control {
-      width: 100%;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 0.65rem 1rem;
-      border-radius: 10px;
-      outline: none;
-      font-size: 0.95rem;
-    }
-    .form-control:focus {
-      border-color: var(--anemo);
-    }
-    .btn-action {
-      padding: 0.65rem 1.25rem;
-      border-radius: 10px;
-      border: none;
-      font-weight: 700;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--anemo), #059669);
-      color: #0b0e17;
-    }
-    .btn-danger {
-      background: linear-gradient(135deg, var(--pyro), #dc2626);
-      color: #fff;
-    }
-    .btn-approve {
-      background: var(--accent-green);
-      color: #fff;
-      padding: 0.35rem 0.75rem;
-      font-size: 0.8rem;
-    }
-    .btn-reject {
-      background: var(--accent-red);
-      color: #fff;
-      padding: 0.35rem 0.75rem;
-      font-size: 0.8rem;
-    }
-    .login-box {
-      max-width: 420px;
-      margin: 4rem auto;
-      text-align: center;
-    }
-    .badge-suspicious {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid var(--accent-red);
-      color: #fca5a5;
-      padding: 0.2rem 0.5rem;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
+  <div class="bg-stars" aria-hidden="true"></div>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="container header-container">
-      <a href="/" class="brand">
-        <div class="brand-icon">👑</div>
-        <div class="brand-text">
-          <h1>GENSHIN FLOOD</h1>
-          <span>Панель Управління Власника</span>
-        </div>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="./" class="brand">
+        <span class="brand__mark" aria-hidden="true">👑</span>
+        <span class="brand__text">
+          <span class="brand__title">Genshin Flood</span>
+          <span class="brand__subtitle">Панель управління власника</span>
+        </span>
       </a>
-      <div class="nav-actions">
-        <a href="/" class="admin-nav-btn" style="color: var(--anemo); border-color: rgba(72,229,194,0.3);">
-          <span>🌐</span> Головна
+      <nav class="topbar__actions">
+        <a href="./" class="btn btn--ghost btn--sm">
+          <span aria-hidden="true">📊</span>
+          <span>Дашборд</span>
         </a>
-        <button id="logoutBtn" class="admin-nav-btn" style="display:none; color: var(--accent-red); border-color: rgba(239,68,68,0.3);">
-          Вийти
+        <button id="logoutBtn" class="btn btn--danger-ghost btn--sm" type="button" hidden>
+          <span aria-hidden="true">🚪</span>
+          <span>Вийти</span>
         </button>
-      </div>
+      </nav>
     </div>
   </header>
 
-  <main class="container" style="padding-top: 2rem;">
+  <main class="container page">
 
-    <!-- LOGIN SECTION -->
-    <div id="loginSection" class="login-box admin-card">
-      <h3>🔐 Вхід в адмін-панель</h3>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-        Введіть пароль адміністратора (вказаний у <code>ADMIN_SECRET</code> або Google Таблиці).
-      </p>
-      <input type="password" id="adminPasswordInput" class="form-control" placeholder="Пароль адміністратора..." style="margin-bottom: 1rem;">
-      <button id="loginBtn" class="btn-action btn-primary" style="width: 100%;">Увійти</button>
-    </div>
-
-    <!-- MAIN ADMIN PANEL (HIDDEN BY DEFAULT) -->
-    <div id="adminPanel" style="display: none;">
-
-      <!-- SETTINGS -->
-      <div class="admin-card">
-        <h3>⚙️ Налаштування флуду</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Тижнева норма (повідомлень)</label>
-            <input type="number" id="settingMin" class="form-control" min="1" max="5000">
-          </div>
-          <div class="form-group">
-            <label>Основна мова бота</label>
-            <select id="settingLang" class="form-control">
-              <option value="ua">Українська (UA)</option>
-              <option value="eng">English (ENG)</option>
-              <option value="ru">Русский (RU)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Година чистки у неділю (GMT+3)</label>
-            <input type="number" id="settingCleanHour" class="form-control" min="0" max="23">
-          </div>
-          <div class="form-group">
-            <label>Максимум варнів до кіку</label>
-            <input type="number" id="settingMaxWarns" class="form-control" min="1" max="10">
-          </div>
-        </div>
-        <button id="saveSettingsBtn" class="btn-action btn-primary">Зберегти налаштування</button>
-      </div>
-
-      <!-- REST REQUESTS -->
-      <div class="admin-card">
-        <h3>📋 Заявки на рест (Очікують рішення)</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
-          Звертайте увагу на повідомлення на момент подачі: підозріло, коли людина має мало повідомлень перед самою чисткою!
+    <!-- LOGIN VIEW -->
+    <section id="loginSection" class="login">
+      <div class="card login__card">
+        <div class="login__mark" aria-hidden="true">✦</div>
+        <div class="login__title">Вхід в адмін-панель</div>
+        <p class="login__text">
+          Введіть секретний пароль адміністратора Тейвату (налаштований у Google Таблиці або змінних середовища).
         </p>
 
-        <div class="table-wrapper">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Користувач</th>
-                <th>Термін</th>
-                <th>Актив на момент запиту</th>
-                <th>Причина</th>
-                <th>Статус</th>
-                <th>Дія</th>
-              </tr>
-            </thead>
-            <tbody id="restRequestsBody">
-              <tr>
-                <td colspan="7" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">
-                  Завантаження заявок...
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <form id="loginForm" onsubmit="return false;">
+          <div class="field">
+            <input
+              type="password"
+              id="adminPasswordInput"
+              class="input"
+              placeholder="Пароль адміністратора…"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+          <div id="loginError" class="form-error" hidden></div>
+          <button type="submit" id="loginBtn" class="btn btn--primary btn--block">
+            <span>Увійти в систему</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ADMIN PANEL VIEW -->
+    <section id="adminPanel" class="admin" hidden>
+      
+      <!-- Warning for default password -->
+      <div id="defaultPasswordWarning" class="banner banner--warn" hidden>
+        <span class="banner__icon">⚠️</span>
+        <div>
+          <strong>Безпека:</strong> Використовується стандартний пароль <code>genshin_admin_secret_123</code>.
+          Рекомендуємо змінити його у вкладці <em>Settings</em> вашої Google Таблиці (поле <code>admin_password</code>) або у змінній <code>ADMIN_SECRET</code> на Vercel.
         </div>
       </div>
 
-      <!-- MANUAL CLEANUP -->
-      <div class="admin-card" style="border-color: rgba(239, 68, 68, 0.4);">
-        <h3 style="color: #fca5a5;">🧹 Позачергова чистка флуду</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
-          Запускає алгоритм перевірки норми прямо зараз: видає варни або кікає тих, хто не набрав мінімум і не має імунітету від ресту. Також скидає лічильник тижневих повідомлень.
-        </p>
-        <button id="manualCleanBtn" class="btn-action btn-danger">
-          🧹 Запустити чистку прямо зараз
+      <div class="admin-head">
+        <div>
+          <span class="eyebrow">Тейват · Управління чатом</span>
+          <h1 class="page-title">Панель керування флудом</h1>
+        </div>
+        <div class="topbar__actions">
+          <button id="refreshDataBtn" class="btn btn--ghost btn--sm" type="button" title="Оновити дані">
+            <span aria-hidden="true">🔄</span>
+            <span>Оновити</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation tabs -->
+      <nav class="tabs" role="tablist">
+        <button class="tabs__btn is-active" type="button" data-tab="requests">
+          <span>📋 Заявки на рест</span>
+          <span id="pendingBadge" class="count" data-zero="true"></span>
         </button>
-      </div>
+        <button class="tabs__btn" type="button" data-tab="settings">
+          <span>⚙️ Налаштування</span>
+        </button>
+        <button class="tabs__btn" type="button" data-tab="users">
+          <span>👥 Учасники флуду</span>
+          <span id="usersCountBadge" class="count"></span>
+        </button>
+        <button class="tabs__btn" type="button" data-tab="cleanup">
+          <span>🧹 Чистка чату</span>
+        </button>
+      </nav>
 
-      <!-- ALL USERS -->
-      <div class="admin-card">
-        <h3>👥 Усі учасники в базі даних</h3>
-        <div class="table-wrapper">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>UID</th>
-                <th>Користувач</th>
-                <th>Тиждень</th>
-                <th>Загалом</th>
-                <th>Варни</th>
-                <th>Статус</th>
-                <th>Дії</th>
-              </tr>
-            </thead>
-            <tbody id="allUsersBody">
-              <tr>
-                <td colspan="7" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">
-                  Завантаження учасників...
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- TAB 1: REST REQUESTS -->
+      <div id="tabContentRequests" class="tab-pane">
+        <div class="panel">
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title">Заявки на рест (відпустку)</h2>
+              <p class="panel__hint">Учасники зі схваленим рестом отримують імунітет під час щотижневої чистки.</p>
+            </div>
+            <div class="segmented" role="group">
+              <button class="segmented__btn is-active" type="button" data-filter-rest="pending">Очікують</button>
+              <button class="segmented__btn" type="button" data-filter-rest="all">Всі заявки</button>
+            </div>
+          </div>
+
+          <div id="restRequestsList" class="rest-list">
+            <!-- Dynamically populated -->
+          </div>
         </div>
       </div>
 
-    </div>
+      <!-- TAB 2: SETTINGS -->
+      <div id="tabContentSettings" class="tab-pane" hidden>
+        <div class="settings-grid">
+          <div class="panel">
+            <div class="panel__head">
+              <h2 class="panel__title">Параметри флуду та чистки</h2>
+              <p class="panel__hint">Зміни синхронізуються безпосередньо з Google Таблицею та ботом.</p>
+            </div>
 
+            <form id="settingsForm" class="form-grid" onsubmit="return false;">
+              <div class="field">
+                <label class="field__label" for="settingMin">Тижнева норма повідомлень</label>
+                <input type="number" id="settingMin" class="input" min="1" max="10000" placeholder="50">
+                <span class="field__hint">Мінімум повідомлень для проходження чистки</span>
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="settingLang">Мова бота за замовчуванням</label>
+                <select id="settingLang" class="select">
+                  <option value="ua">Українська (UA)</option>
+                  <option value="eng">English (ENG)</option>
+                  <option value="ru">Русский (RU)</option>
+                </select>
+                <span class="field__hint">Мова сповіщень та системних повідомлень</span>
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="settingCleanHour">Година чистки у неділю</label>
+                <input type="number" id="settingCleanHour" class="input" min="0" max="23" placeholder="20">
+                <span class="field__hint">За часовим поясом GMT+3 (за замовчуванням 20:00)</span>
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="settingMaxWarns">Максимум попереджень (варнів)</label>
+                <input type="number" id="settingMaxWarns" class="input" min="1" max="10" placeholder="3">
+                <span class="field__hint">При досягненні ліміту учасник кікається</span>
+              </div>
+
+              <div class="field field--full">
+                <label class="field__label" for="settingCleanAction">Дія при невиконанні норми</label>
+                <select id="settingCleanAction" class="select">
+                  <option value="warn_and_kick">Видавати варн, а при ліміті — кікати (Рекомендовано)</option>
+                  <option value="warn_only">Тільки видавати варни (без автоматичного кіку)</option>
+                  <option value="kick_only">Одразу кікати з чату (жорсткий режим)</option>
+                </select>
+                <span class="field__hint">Логіка обробки учасників без норми та ресту</span>
+              </div>
+
+              <div class="form-actions field--full">
+                <button type="button" id="saveSettingsBtn" class="btn btn--primary">
+                  <span>Зберегти налаштування</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <h2 class="panel__title">Довідник Тейвату</h2>
+            </div>
+            <div class="callout callout--hydro">
+              <strong>🧹 Автоматична чистка</strong>
+              <span>Щонеділі о 20:00 (GMT+3 / 17:00 UTC) Vercel Cron запускає перевірку активу.</span>
+            </div>
+            <div class="callout" style="margin-top: 10px; background: rgba(211, 188, 142, 0.08); border-color: var(--border-strong);">
+              <strong>🏖️ Імунітет ресту</strong>
+              <span>Учасники, які мають схвалений рест на момент чистки, не отримують варнів і не виключаються.</span>
+            </div>
+            <div class="callout" style="margin-top: 10px; background: rgba(179, 136, 255, 0.08); border-color: rgba(179, 136, 255, 0.28);">
+              <strong>📊 Синхронізація</strong>
+              <span>Кожне повідомлення у прив'язаному чаті оновлює тижневий, місячний та загальний лічильники в Google Sheets.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: USERS LIST -->
+      <div id="tabContentUsers" class="tab-pane" hidden>
+        <div class="panel">
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title">Усі учасники в базі даних</h2>
+              <p class="panel__hint">Перегляд статистики, поточних варнів та ручне скидання покарань.</p>
+            </div>
+            <div class="search" style="max-width: 320px;">
+              <span class="search__icon" aria-hidden="true">⌕</span>
+              <input id="userSearchInput" class="input" type="search" placeholder="Фільтр за ім'ям чи UID…">
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Мандрівник</th>
+                  <th>UID</th>
+                  <th>Тиждень</th>
+                  <th>Загалом</th>
+                  <th>Варни</th>
+                  <th>Статус</th>
+                  <th class="actions">Дії</th>
+                </tr>
+              </thead>
+              <tbody id="allUsersBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: MANUAL CLEANUP (DANGER ZONE) -->
+      <div id="tabContentCleanup" class="tab-pane" hidden>
+        <div class="panel panel--danger">
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title" style="color: #fca5a5;">🧹 Позачергова ручна чистка флуду</h2>
+              <p class="panel__hint">Примусовий запуск щотижневого алгоритму перевірки прямо зараз.</p>
+            </div>
+          </div>
+
+          <p class="danger-text">
+            Ця дія виконує повний цикл щотижневої чистки не чекаючи неділі:
+          </p>
+
+          <ul class="danger-list">
+            <li>Перевіряє тижневі повідомлення кожного учасника відповідно до норми.</li>
+            <li>Учасники зі схваленим рестом зберігають імунітет.</li>
+            <li>Учасники без норми отримують <strong>+1 попередження (варн)</strong>.</li>
+            <li>Учасники, які досягли ліміту варнів, <strong>кікаються з Telegram-чату</strong> ботом.</li>
+            <li>Лічильники тижневих повідомлень скидаються на <strong>0</strong> для нового тижня.</li>
+            <li>Надсилається звітний протокол у флуд-чат.</li>
+          </ul>
+
+          <div style="margin-top: 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <button id="manualCleanBtn" class="btn btn--danger" type="button">
+              <span aria-hidden="true">⚠️</span>
+              <span>Запустити чистку прямо зараз</span>
+            </button>
+            <span class="muted" style="font-size: 13px;">Операція незворотна, дані тижня будуть оновлені!</span>
+          </div>
+
+          <div id="cleanReportResult" class="callout callout--hydro" style="margin-top: 16px;" hidden>
+            <strong>Звіт останньої чистки:</strong>
+            <div id="cleanReportBody"></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
   </main>
+
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="modal" hidden>
+    <div class="modal__backdrop" id="modalBackdrop"></div>
+    <div class="modal__card card">
+      <h3 id="modalTitle" class="modal__title">Підтвердження</h3>
+      <p id="modalText" class="modal__text">Ви впевнені, що бажаєте виконати цю дію?</p>
+      <div class="modal__actions">
+        <button type="button" id="modalCancelBtn" class="btn btn--ghost btn--sm">Скасувати</button>
+        <button type="button" id="modalConfirmBtn" class="btn btn--primary btn--sm">Підтвердити</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <footer class="footer">
+    <div class="container">
+      <span>Genshin Flood Bot · Telegram + Google Sheets</span>
+      <span>✦ Teyvat Admin Control</span>
+    </div>
+  </footer>
 
   <script src="./js/admin.js"></script>
 </body>

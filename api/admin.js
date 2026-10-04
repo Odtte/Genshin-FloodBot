@@ -12,6 +12,8 @@ import { runCleanup } from '../src/services/cleanup.js';
 import { getBot } from '../src/bot/instance.js';
 import { config } from '../src/config.js';
 
+const DEFAULT_PASSWORD = 'genshin_admin_secret_123';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -21,23 +23,24 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Admin authentication check
+  // Admin authentication check (only owner-controlled secrets: Settings sheet or ADMIN_SECRET env)
   const token = String(req.headers['x-admin-token'] || req.query.token || '').trim();
   const settings = await getSettings();
   const tableSecret = String(settings.admin_password || '').trim();
   const envSecret = String(config.adminSecret || '').trim();
 
-  const isMatch = Boolean(
-    token && (
-      token === tableSecret ||
-      token === envSecret ||
-      token === 'genshin_admin_secret_123'
-    )
-  );
+  const isMatch = Boolean(token && (token === tableSecret || token === envSecret));
 
   if (!isMatch) {
     return res.status(401).json({ error: 'Unauthorized: Invalid Admin Password' });
   }
+
+  // The default password is published in the repository, so warn the owner to change it
+  const isDefaultPassword = tableSecret === DEFAULT_PASSWORD || envSecret === DEFAULT_PASSWORD;
+  const publicSettings = (s) => {
+    const { admin_password, ...rest } = s;
+    return { ...rest, is_default_password: isDefaultPassword };
+  };
 
   const action = req.query.action || (req.body && req.body.action);
 
@@ -48,7 +51,7 @@ export default async function handler(req, res) {
       const restRequests = await getAllRestRequests();
 
       return res.status(200).json({
-        settings,
+        settings: publicSettings(settings),
         users,
         restRequests: restRequests.reverse() // newest first
       });
@@ -65,7 +68,7 @@ export default async function handler(req, res) {
       if (max_warns !== undefined) await updateSetting('max_warns', max_warns);
 
       const updated = await getSettings(true);
-      return res.status(200).json({ success: true, settings: updated });
+      return res.status(200).json({ success: true, settings: publicSettings(updated) });
     }
 
     // 3. DECIDE REST REQUEST (Approve / Reject)

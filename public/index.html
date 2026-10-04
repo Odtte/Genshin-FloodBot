@@ -3,224 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Genshin Flood | Панель учасників</title>
-  <link rel="stylesheet" href="./css/style.css">
+  <title>Genshin Flood — Дашборд</title>
+  <meta name="description" content="Статистика флуду: норма повідомлень, рейтинг учасників, рести та чистки.">
+  <meta name="theme-color" content="#0a0e1a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
+  <div class="bg-stars" aria-hidden="true"></div>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="container header-container">
-      <a href="/" class="brand">
-        <div class="brand-icon">✨</div>
-        <div class="brand-text">
-          <h1>GENSHIN FLOOD</h1>
-          <span id="headerSubtitle">Система Чисток & Рестів</span>
-        </div>
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="./" class="brand">
+        <span class="brand__mark" aria-hidden="true">✦</span>
+        <span class="brand__text">
+          <span class="brand__title">Genshin Flood</span>
+          <span class="brand__subtitle" data-i18n="headerSubtitle">Система чисток і рестів</span>
+        </span>
       </a>
-
-      <div class="nav-actions">
-        <!-- Language Switcher -->
-        <div class="lang-selector">
-          <button class="lang-btn active" data-lang="ua">UA</button>
-          <button class="lang-btn" data-lang="eng">ENG</button>
-          <button class="lang-btn" data-lang="ru">RU</button>
+      <nav class="topbar__actions">
+        <div class="segmented" role="group" aria-label="Language">
+          <button class="segmented__btn is-active" type="button" data-lang="ua">UA</button>
+          <button class="segmented__btn" type="button" data-lang="eng">EN</button>
+          <button class="segmented__btn" type="button" data-lang="ru">RU</button>
         </div>
-
-        <a href="/admin" class="admin-nav-btn">
-          <span>👑</span>
-          <span id="navAdminText">Адмін</span>
-        </a>
-      </div>
+        <a href="./admin" class="btn btn--ghost btn--sm"><span aria-hidden="true">👑</span><span data-i18n="navAdmin">Адмін</span></a>
+      </nav>
     </div>
   </header>
 
-  <!-- MAIN CONTENT -->
-  <main class="container">
-
-    <!-- HERO & COUNTDOWN -->
-    <section class="hero">
-      <h2 id="heroTitle">Флуд Геншин Імпакт</h2>
-      <p id="heroDesc">Відстежуйте свою щотижневу норму спілкування, статус імунітету від чисток та рести.</p>
-
-      <div class="countdown-box">
-        <div class="countdown-title" id="countdownLabel">⏳ До недільної чистки:</div>
-        <div class="countdown-timer">
-          <div class="timer-item">
-            <span class="timer-num" id="cdDays">00</span>
-            <span class="timer-label" id="lblDays">Днів</span>
-          </div>
-          <div class="timer-item">
-            <span class="timer-num" id="cdHours">00</span>
-            <span class="timer-label" id="lblHours">Год</span>
-          </div>
-          <div class="timer-item">
-            <span class="timer-num" id="cdMinutes">00</span>
-            <span class="timer-label" id="lblMins">Хв</span>
-          </div>
-          <div class="timer-item">
-            <span class="timer-num" id="cdSeconds">00</span>
-            <span class="timer-label" id="lblSecs">Сек</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- STATS OVERVIEW -->
-    <section class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-title" id="statMembersLbl">Учасників флуду</span>
-          <span class="stat-icon">👥</span>
-        </div>
-        <div class="stat-value" id="valTotalMembers">—</div>
-        <div class="stat-subtitle" id="statMembersSub">Активні мандрівники</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-title" id="statQuotaLbl">Тижнева норма</span>
-          <span class="stat-icon">🎯</span>
-        </div>
-        <div class="stat-value" id="valMinMessages">—</div>
-        <div class="stat-subtitle" id="statQuotaSub">Мінімум для імунітету</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-title" id="statWeeklyLbl">Повідомлень за тиждень</span>
-          <span class="stat-icon">💬</span>
-        </div>
-        <div class="stat-value" id="valWeeklyTotal">—</div>
-        <div class="stat-subtitle" id="statWeeklySub">Загальний флуд</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-title" id="statRestLbl">На ресті (відпустка)</span>
-          <span class="stat-icon">🏖️</span>
-        </div>
-        <div class="stat-value" id="valResting">—</div>
-        <div class="stat-subtitle" id="statRestSub">Мають імунітет</div>
-      </div>
-    </section>
-
-    <!-- USER SEARCH -->
-    <section class="search-section">
-      <div class="search-bar">
-        <input 
-          type="text" 
-          id="searchInput" 
-          class="search-input" 
-          placeholder="Введіть свій UID, @username або ID..."
-        >
-        <button id="searchBtn" class="search-btn">Знайти картку</button>
-      </div>
-    </section>
-
-    <!-- MEMBER PROFILE CARD (GENSHIN CARD STYLE) -->
-    <div id="profileWrapper" class="profile-card-wrapper">
-      <div class="genshin-card">
-        <div class="card-top">
-          <div class="card-avatar" id="cardAvatar">✦</div>
-          <div class="card-info">
-            <div class="card-name" id="cardName">Мандрівник</div>
-            <div class="card-uid" id="cardUid">UID: 700000000</div>
-          </div>
-          <div class="card-rank-badge" id="cardRank">Ранг #—</div>
-        </div>
-
-        <!-- QUOTA PROGRESS -->
-        <div class="quota-box">
-          <div class="quota-header">
-            <span class="quota-label" id="cardQuotaLabel">Прогрес щотижневої норми</span>
-            <span class="quota-count" id="cardQuotaCount">0 / 50 (0%)</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="cardProgressFill" style="width: 0%;"></div>
-          </div>
-        </div>
-
-        <!-- 4 TIMEFRAMES ACTIVITY GRID -->
-        <div class="card-metrics" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 1rem;">
-          <div class="metric-item">
-            <div class="metric-label" id="cardDailyLbl">☀️ Сьогодні</div>
-            <div class="metric-val" id="cardDailyVal">0</div>
-          </div>
-          <div class="metric-item">
-            <div class="metric-label" id="cardWeeklyLbl">📅 Цей тиждень</div>
-            <div class="metric-val" id="cardWeeklyVal" style="color: var(--anemo);">0</div>
-          </div>
-          <div class="metric-item">
-            <div class="metric-label" id="cardMonthlyLbl">🌙 Цей місяць</div>
-            <div class="metric-val" id="cardMonthlyVal">0</div>
-          </div>
-          <div class="metric-item">
-            <div class="metric-label" id="cardTotalLbl">🏆 За весь час</div>
-            <div class="metric-val" id="cardTotalVal" style="color: var(--accent-gold);">0</div>
-          </div>
-        </div>
-
-        <!-- STATUS & WARNS ROW -->
-        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(11, 14, 23, 0.4); border: 1px solid var(--border-color); padding: 0.75rem 1.25rem; border-radius: 12px;">
-          <div>
-            <span style="font-size: 0.8rem; color: var(--text-dim);" id="cardWarnsLbl">Попередження:</span>
-            <strong id="cardWarnsVal" style="color: var(--accent-gold); margin-left: 0.35rem;">0 / 3</strong>
-          </div>
-          <div id="cardStatusVal">
-            <span class="status-badge badge-active">В строю</span>
-          </div>
-        </div>
-
-        <div id="cardRestDetails" style="margin-top: 1rem; font-size: 0.85rem; color: var(--hydro); display: none;">
-          🏖️ <strong>Рест до:</strong> <span id="cardRestDate">—</span> | <strong>Причина:</strong> <span id="cardRestReason">—</span>
-        </div>
-      </div>
+  <main class="container page">
+    <div id="demoBanner" class="banner banner--info" hidden>
+      <span class="banner__icon">ℹ️</span>
+      <span data-i18n="demoBanner">Демо-режим: показано тестові дані.</span>
     </div>
 
-    <!-- LEADERBOARD SECTION -->
-    <section class="leaderboard-section">
-      <div class="section-head">
-        <h3 id="boardTitle">Таблиця лідерів флуду</h3>
-        <div class="tab-group">
-          <button class="tab-btn active" id="tabWeekly" data-tab="weekly">Цей тиждень</button>
-          <button class="tab-btn" id="tabAllTime" data-tab="alltime">За весь час</button>
-        </div>
+    <!-- Hero + countdown -->
+    <section class="hero">
+      <div class="hero__text">
+        <span class="eyebrow" data-i18n="heroEyebrow">Флуд-чат · Тейват</span>
+        <h1 class="hero__title" data-i18n="heroTitle">Флуд Геншин Імпакт</h1>
+        <p class="hero__desc" data-i18n="heroDesc">Слідкуй за тижневою нормою, рейтингом і статусом реста.</p>
       </div>
 
-      <div class="table-wrapper">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th id="thUser">Користувач</th>
-              <th id="thWeekly">Цього тижня</th>
-              <th id="thTotal">Загалом</th>
-              <th id="thQuota">Виконання</th>
-              <th id="thStatus">Статус</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboardBody">
-            <tr>
-              <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                Завантаження даних флуду...
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="card countdown" aria-live="off">
+        <div class="countdown__label" data-i18n="countdownLabel">До недільної чистки</div>
+        <div class="countdown__grid">
+          <div class="countdown__cell"><span class="countdown__num" id="cdDays">00</span><span class="countdown__unit" data-i18n="unitDays">дн</span></div>
+          <div class="countdown__cell"><span class="countdown__num" id="cdHours">00</span><span class="countdown__unit" data-i18n="unitHours">год</span></div>
+          <div class="countdown__cell"><span class="countdown__num" id="cdMins">00</span><span class="countdown__unit" data-i18n="unitMins">хв</span></div>
+          <div class="countdown__cell"><span class="countdown__num" id="cdSecs">00</span><span class="countdown__unit" data-i18n="unitSecs">сек</span></div>
+        </div>
+        <div class="countdown__foot"><span aria-hidden="true">🧹</span><span id="cleanInfo" data-i18n="cleanInfo">Неділя · 20:00 (GMT+3)</span></div>
       </div>
     </section>
 
+    <!-- Stats -->
+    <section class="stats" aria-label="Stats">
+      <article class="stat">
+        <div class="stat__icon stat__icon--anemo" aria-hidden="true">👥</div>
+        <div class="stat__body">
+          <div class="stat__label" data-i18n="statMembers">Учасників</div>
+          <div class="stat__value" id="valMembers">—</div>
+          <div class="stat__sub" data-i18n="statMembersSub">активних мандрівників</div>
+        </div>
+      </article>
+      <article class="stat">
+        <div class="stat__icon stat__icon--gold" aria-hidden="true">🎯</div>
+        <div class="stat__body">
+          <div class="stat__label" data-i18n="statQuota">Норма</div>
+          <div class="stat__value" id="valQuota">—</div>
+          <div class="stat__sub" data-i18n="statQuotaSub">повідомлень на тиждень</div>
+        </div>
+      </article>
+      <article class="stat">
+        <div class="stat__icon stat__icon--electro" aria-hidden="true">💬</div>
+        <div class="stat__body">
+          <div class="stat__label" data-i18n="statWeekly">Флуд за тиждень</div>
+          <div class="stat__value" id="valWeekly">—</div>
+          <div class="stat__sub" data-i18n="statWeeklySub">повідомлень у чаті</div>
+        </div>
+      </article>
+      <article class="stat">
+        <div class="stat__icon stat__icon--hydro" aria-hidden="true">🏖️</div>
+        <div class="stat__body">
+          <div class="stat__label" data-i18n="statRest">На ресті</div>
+          <div class="stat__value" id="valResting">—</div>
+          <div class="stat__sub" data-i18n="statRestSub">мають імунітет</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Leaderboard + profile -->
+    <section class="layout">
+      <div class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title" data-i18n="boardTitle">Таблиця лідерів</h2>
+          <div class="segmented" role="tablist">
+            <button class="segmented__btn is-active" type="button" data-tab="weekly" data-i18n="tabWeekly">Тиждень</button>
+            <button class="segmented__btn" type="button" data-tab="alltime" data-i18n="tabAllTime">Весь час</button>
+          </div>
+        </div>
+
+        <div class="search">
+          <span class="search__icon" aria-hidden="true">⌕</span>
+          <input id="searchInput" class="input" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" placeholder="Ім'я, @username або UID…">
+          <div id="searchHint" class="search__hint" data-i18n="searchHint">Enter — знайти в базі</div>
+        </div>
+
+        <ol id="leaderboard" class="board" aria-live="polite"></ol>
+      </div>
+
+      <aside class="panel panel--sticky" id="profilePanel" aria-live="polite">
+        <div id="profileEmpty" class="empty">
+          <div class="empty__icon">✦</div>
+          <div class="empty__title" data-i18n="profileEmptyTitle">Паспорт мандрівника</div>
+          <div class="empty__text" data-i18n="profileEmptyText">Обери учасника в таблиці або знайди себе через пошук.</div>
+        </div>
+
+        <div id="profileCard" class="profile" hidden>
+          <div class="profile__head">
+            <div id="pAvatar" class="avatar avatar--xl">✦</div>
+            <div class="profile__id">
+              <div class="profile__name" id="pName">—</div>
+              <div class="profile__meta">
+                <span id="pUsername">—</span>
+                <span class="mono">UID <span id="pUid">—</span></span>
+              </div>
+            </div>
+            <span class="rank-pill" id="pRank">#—</span>
+          </div>
+
+          <div class="profile__row">
+            <span id="pStatus"></span>
+            <span><span data-i18n="warnsLabel">Попередження</span>&nbsp; <span id="pWarns" class="warn-dots"></span></span>
+          </div>
+
+          <div class="quota">
+            <div class="quota__row"><span data-i18n="quotaLabel">Тижнева норма</span><strong id="pQuotaText">0 / 0</strong></div>
+            <div class="progress progress--lg"><span class="progress__bar" id="pQuotaBar" style="width:0%"></span></div>
+            <div class="quota__hint" id="pQuotaHint"></div>
+          </div>
+
+          <div class="metrics">
+            <div class="metric"><span class="metric__label">☀️ <span data-i18n="mDay">Сьогодні</span></span><span class="metric__value" id="pDay">0</span></div>
+            <div class="metric metric--week"><span class="metric__label">📅 <span data-i18n="mWeek">Тиждень</span></span><span class="metric__value" id="pWeek">0</span></div>
+            <div class="metric"><span class="metric__label">🌙 <span data-i18n="mMonth">Місяць</span></span><span class="metric__value" id="pMonth">0</span></div>
+            <div class="metric metric--total"><span class="metric__label">🏆 <span data-i18n="mTotal">Весь час</span></span><span class="metric__value" id="pTotal">0</span></div>
+          </div>
+
+          <div id="pRest" class="callout callout--hydro" hidden>
+            <div>🏖️ <strong data-i18n="restUntil">Рест до</strong>: <span id="pRestDate">—</span></div>
+            <div><span data-i18n="restReason">Причина</span>: <span id="pRestReason">—</span></div>
+          </div>
+        </div>
+      </aside>
+    </section>
   </main>
 
-  <!-- FOOTER -->
   <footer class="footer">
     <div class="container">
-      <p>Genshin Flood Bot &copy; 2026. Розроблено для комфортного спілкування та чистоти чатів.</p>
-      <p style="margin-top: 0.5rem;">Telegram Webhook на Vercel + Google Sheets База Даних</p>
+      <span data-i18n="footer">Genshin Flood Bot · Telegram + Google Sheets</span>
+      <span>✦ Teyvat Flood Control</span>
     </div>
   </footer>
 
