@@ -35,10 +35,13 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // Mock res.status & res.json
+  // Mock res.status & res.json with chaining
   res.status = (code) => {
     res.statusCode = code;
-    return res;
+    return {
+      json: (data) => res.json(data),
+      end: (data) => res.end(data)
+    };
   };
   res.json = (data) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -47,17 +50,32 @@ const server = http.createServer(async (req, res) => {
 
   // Route: /api/stats
   if (pathname === '/api/stats') {
-    return statsHandler(req, res);
+    try {
+      return await statsHandler(req, res);
+    } catch (err) {
+      console.error('Error handling /api/stats:', err);
+      return res.status(500).json({ error: err.message });
+    }
   }
 
   // Route: /api/admin
   if (pathname === '/api/admin') {
-    return adminHandler(req, res);
+    try {
+      return await adminHandler(req, res);
+    } catch (err) {
+      console.error('Error handling /api/admin:', err);
+      return res.status(500).json({ error: err.message });
+    }
   }
 
   // Route: /api/cron/cleanup
   if (pathname === '/api/cron/cleanup') {
-    return cleanupHandler(req, res);
+    try {
+      return await cleanupHandler(req, res);
+    } catch (err) {
+      console.error('Error handling /api/cron/cleanup:', err);
+      return res.status(500).json({ error: err.message });
+    }
   }
 
   // Static files from /public

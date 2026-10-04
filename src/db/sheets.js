@@ -8,13 +8,153 @@ let settingsCache = null;
 let lastSettingsFetch = 0;
 
 /**
+ * Check if Google Sheets credentials are provided in env
+ */
+export function isSheetsConfigured() {
+  return Boolean(
+    config.sheets.spreadsheetId &&
+    config.sheets.clientEmail &&
+    config.sheets.privateKey &&
+    !config.sheets.spreadsheetId.includes('<ID>')
+  );
+}
+
+// In-Memory Storage for Local Development / Testing without Google Cloud keys
+let localSettings = {
+  chat_id: '',
+  owner_id: '',
+  language: config.defaults.language,
+  min_messages: config.defaults.minMessages,
+  clean_day: config.defaults.cleanDay,
+  clean_hour: config.defaults.cleanHour,
+  clean_action: config.defaults.cleanAction,
+  max_warns: config.defaults.maxWarns,
+  admin_password: config.adminSecret
+};
+
+let localUsers = [
+  {
+    uid: '700000001',
+    telegram_id: '101',
+    username: '@lumine',
+    first_name: 'Lumine',
+    daily_messages: '25',
+    weekly_messages: '185',
+    monthly_messages: '450',
+    total_messages: '3200',
+    warns: '0',
+    status: 'active',
+    rest_until: '',
+    rest_reason: '',
+    last_daily_date: new Date().toISOString().slice(0, 10),
+    last_monthly_date: new Date().toISOString().slice(0, 7),
+    last_active: new Date().toISOString()
+  },
+  {
+    uid: '700000002',
+    telegram_id: '102',
+    username: '@venti_bard',
+    first_name: 'Venti',
+    daily_messages: '18',
+    weekly_messages: '142',
+    monthly_messages: '380',
+    total_messages: '2890',
+    warns: '0',
+    status: 'active',
+    rest_until: '',
+    rest_reason: '',
+    last_daily_date: new Date().toISOString().slice(0, 10),
+    last_monthly_date: new Date().toISOString().slice(0, 7),
+    last_active: new Date().toISOString()
+  },
+  {
+    uid: '700000003',
+    telegram_id: '103',
+    username: '@raiden_ei',
+    first_name: 'Raiden Shogun',
+    daily_messages: '14',
+    weekly_messages: '110',
+    monthly_messages: '290',
+    total_messages: '1950',
+    warns: '0',
+    status: 'active',
+    rest_until: '',
+    rest_reason: '',
+    last_daily_date: new Date().toISOString().slice(0, 10),
+    last_monthly_date: new Date().toISOString().slice(0, 7),
+    last_active: new Date().toISOString()
+  },
+  {
+    uid: '700000004',
+    telegram_id: '104',
+    username: '@nahida_kusanali',
+    first_name: 'Nahida',
+    daily_messages: '0',
+    weekly_messages: '20',
+    monthly_messages: '110',
+    total_messages: '840',
+    warns: '0',
+    status: 'rest',
+    rest_until: new Date(Date.now() + 86400000 * 5).toISOString(),
+    rest_reason: 'Сесія в Академії',
+    last_daily_date: new Date().toISOString().slice(0, 10),
+    last_monthly_date: new Date().toISOString().slice(0, 7),
+    last_active: new Date().toISOString()
+  },
+  {
+    uid: '700000005',
+    telegram_id: '105',
+    username: '@furina_de_fontaine',
+    first_name: 'Furina',
+    daily_messages: '2',
+    weekly_messages: '2',
+    monthly_messages: '65',
+    total_messages: '420',
+    warns: '1',
+    status: 'warned',
+    rest_until: '',
+    rest_reason: '',
+    last_daily_date: new Date().toISOString().slice(0, 10),
+    last_monthly_date: new Date().toISOString().slice(0, 7),
+    last_active: new Date().toISOString()
+  }
+];
+
+let localRestRequests = [
+  {
+    id: 'REQ-632115',
+    telegram_id: '105',
+    username: '@furina_de_fontaine',
+    duration: '2w',
+    reason: 'Репетиція в театрі Епіклез',
+    status: 'pending',
+    weekly_msg_at_request: '2',
+    created_at: new Date().toISOString(),
+    processed_at: '',
+    processed_by: ''
+  },
+  {
+    id: 'REQ-849102',
+    telegram_id: '104',
+    username: '@nahida_kusanali',
+    duration: '5d',
+    reason: 'Сесія в Академії',
+    status: 'approved',
+    weekly_msg_at_request: '20',
+    created_at: new Date().toISOString(),
+    processed_at: new Date().toISOString(),
+    processed_by: 'Admin'
+  }
+];
+
+/**
  * Initialize and load Google Spreadsheet
  */
 export async function getDoc() {
   if (docInstance) return docInstance;
 
-  if (!config.sheets.spreadsheetId || !config.sheets.clientEmail || !config.sheets.privateKey) {
-    throw new Error('Google Sheets credentials are not configured in environment variables.');
+  if (!isSheetsConfigured()) {
+    return null;
   }
 
   const serviceAccountAuth = new JWT({
@@ -68,7 +208,6 @@ async function ensureSheets(doc) {
       headerValues: ['key', 'value']
     });
 
-    // Populate default settings
     await settingsSheet.addRows([
       { key: 'chat_id', value: '' },
       { key: 'owner_id', value: '' },
@@ -113,6 +252,7 @@ async function ensureSheets(doc) {
  * Get sheet objects
  */
 async function getSheets() {
+  if (!isSheetsConfigured()) return null;
   if (!sheetsCache) {
     await getDoc();
   }
@@ -120,70 +260,81 @@ async function getSheets() {
 }
 
 /**
- * Load settings as key-value object (with 30s in-memory cache)
+ * Load settings as key-value object
  */
 export async function getSettings(forceRefresh = false) {
+  if (!isSheetsConfigured()) {
+    return { ...localSettings };
+  }
+
   const now = Date.now();
   if (!forceRefresh && settingsCache && (now - lastSettingsFetch < 30000)) {
     return settingsCache;
   }
 
-  const { settings } = await getSheets();
-  const rows = await settings.getRows();
-  const result = {
-    chat_id: '',
-    owner_id: '',
-    language: config.defaults.language,
-    min_messages: config.defaults.minMessages,
-    clean_day: config.defaults.cleanDay,
-    clean_hour: config.defaults.cleanHour,
-    clean_action: config.defaults.cleanAction,
-    max_warns: config.defaults.maxWarns,
-    admin_password: config.adminSecret
-  };
+  try {
+    const sheets = await getSheets();
+    if (!sheets) return { ...localSettings };
 
-  for (const row of rows) {
-    const key = row.get('key');
-    const val = row.get('value');
-    if (key) {
-      if (['min_messages', 'clean_day', 'clean_hour', 'max_warns'].includes(key)) {
-        result[key] = parseInt(val, 10) || result[key];
-      } else {
-        result[key] = val || result[key];
+    const rows = await sheets.settings.getRows();
+    const result = { ...localSettings };
+
+    for (const row of rows) {
+      const key = row.get('key');
+      const val = row.get('value');
+      if (key) {
+        if (['min_messages', 'clean_day', 'clean_hour', 'max_warns'].includes(key)) {
+          result[key] = parseInt(val, 10) || result[key];
+        } else {
+          result[key] = val || result[key];
+        }
       }
     }
-  }
 
-  settingsCache = result;
-  lastSettingsFetch = now;
-  return result;
+    settingsCache = result;
+    lastSettingsFetch = now;
+    return result;
+  } catch (err) {
+    console.warn('Error reading settings from Google Sheets, using local:', err.message);
+    return { ...localSettings };
+  }
 }
 
 /**
  * Update single setting key
  */
 export async function updateSetting(key, value) {
-  const { settings } = await getSheets();
-  const rows = await settings.getRows();
-  let found = false;
-
-  for (const row of rows) {
-    if (row.get('key') === key) {
-      row.set('value', String(value));
-      await row.save();
-      found = true;
-      break;
-    }
-  }
-
-  if (!found) {
-    await settings.addRow({ key, value: String(value) });
-  }
+  localSettings[key] = ['min_messages', 'clean_day', 'clean_hour', 'max_warns'].includes(key)
+    ? parseInt(value, 10)
+    : String(value);
 
   if (settingsCache) {
-    settingsCache[key] = ['min_messages', 'clean_day', 'clean_hour', 'max_warns'].includes(key)
-      ? parseInt(value, 10)
-      : String(value);
+    settingsCache[key] = localSettings[key];
+  }
+
+  if (!isSheetsConfigured()) return;
+
+  try {
+    const sheets = await getSheets();
+    if (!sheets) return;
+
+    const rows = await sheets.settings.getRows();
+    let found = false;
+
+    for (const row of rows) {
+      if (row.get('key') === key) {
+        row.set('value', String(value));
+        await row.save();
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      await sheets.settings.addRow({ key, value: String(value) });
+    }
+  } catch (err) {
+    console.error('Error saving setting to Sheets:', err.message);
   }
 }
 
@@ -191,163 +342,211 @@ export async function updateSetting(key, value) {
  * Get user by Telegram ID
  */
 export async function getUser(telegramId) {
-  const { users } = await getSheets();
-  const rows = await users.getRows();
   const idStr = String(telegramId);
+  if (!isSheetsConfigured()) {
+    return localUsers.find(u => String(u.telegram_id) === idStr) || null;
+  }
 
-  const row = rows.find(r => String(r.get('telegram_id')) === idStr);
-  if (!row) return null;
-
-  return rowToObject(row);
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.users.getRows();
+    const row = rows.find(r => String(r.get('telegram_id')) === idStr);
+    return row ? rowToObject(row) : null;
+  } catch (err) {
+    return localUsers.find(u => String(u.telegram_id) === idStr) || null;
+  }
 }
 
 /**
  * Get user by UID
  */
 export async function getUserByUid(uid) {
-  const { users } = await getSheets();
-  const rows = await users.getRows();
   const uidStr = String(uid);
+  if (!isSheetsConfigured()) {
+    return localUsers.find(u => String(u.uid) === uidStr) || null;
+  }
 
-  const row = rows.find(r => String(r.get('uid')) === uidStr);
-  if (!row) return null;
-
-  return rowToObject(row);
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.users.getRows();
+    const row = rows.find(r => String(r.get('uid')) === uidStr);
+    return row ? rowToObject(row) : null;
+  } catch (err) {
+    return localUsers.find(u => String(u.uid) === uidStr) || null;
+  }
 }
 
 /**
  * Get all users
  */
 export async function getAllUsers() {
-  const { users } = await getSheets();
-  const rows = await users.getRows();
-  return rows.map(rowToObject);
+  if (!isSheetsConfigured()) {
+    return [...localUsers];
+  }
+
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.users.getRows();
+    return rows.map(rowToObject);
+  } catch (err) {
+    return [...localUsers];
+  }
 }
 
 /**
- * Get or create user with generated Genshin-style UID (700000001+)
+ * Get or create user
  */
 export async function getOrCreateUser(tgUser) {
-  const { users } = await getSheets();
-  const rows = await users.getRows();
   const idStr = String(tgUser.id);
-
-  let row = rows.find(r => String(r.get('telegram_id')) === idStr);
-
-  if (row) {
-    // Update username/first_name if changed
-    let updated = false;
-    const newUsername = tgUser.username ? `@${tgUser.username}` : '';
-    const newFirstName = tgUser.first_name || '';
-
-    if (row.get('username') !== newUsername) {
-      row.set('username', newUsername);
-      updated = true;
-    }
-    if (row.get('first_name') !== newFirstName) {
-      row.set('first_name', newFirstName);
-      updated = true;
-    }
-    if (updated) {
-      await row.save();
-    }
-    return rowToObject(row);
-  }
-
-  // Generate new UID
-  const startUid = 700000001;
-  const newUid = startUid + rows.length;
-
   const todayStr = new Date().toISOString().slice(0, 10);
   const monthStr = new Date().toISOString().slice(0, 7);
 
-  const newUserObj = {
-    uid: String(newUid),
-    telegram_id: idStr,
-    username: tgUser.username ? `@${tgUser.username}` : '',
-    first_name: tgUser.first_name || '',
-    daily_messages: '0',
-    weekly_messages: '0',
-    monthly_messages: '0',
-    total_messages: '0',
-    warns: '0',
-    status: 'active',
-    rest_until: '',
-    rest_reason: '',
-    last_daily_date: todayStr,
-    last_monthly_date: monthStr,
-    last_active: new Date().toISOString()
-  };
+  if (!isSheetsConfigured()) {
+    let u = localUsers.find(x => String(x.telegram_id) === idStr);
+    if (!u) {
+      const newUid = 700000001 + localUsers.length;
+      u = {
+        uid: String(newUid),
+        telegram_id: idStr,
+        username: tgUser.username ? `@${tgUser.username}` : '',
+        first_name: tgUser.first_name || '',
+        daily_messages: '0',
+        weekly_messages: '0',
+        monthly_messages: '0',
+        total_messages: '0',
+        warns: '0',
+        status: 'active',
+        rest_until: '',
+        rest_reason: '',
+        last_daily_date: todayStr,
+        last_monthly_date: monthStr,
+        last_active: new Date().toISOString()
+      };
+      localUsers.push(u);
+    }
+    return u;
+  }
 
-  const newRow = await users.addRow(newUserObj);
-  return rowToObject(newRow);
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.users.getRows();
+    let row = rows.find(r => String(r.get('telegram_id')) === idStr);
+
+    if (row) {
+      return rowToObject(row);
+    }
+
+    const startUid = 700000001;
+    const newUid = startUid + rows.length;
+
+    const newUserObj = {
+      uid: String(newUid),
+      telegram_id: idStr,
+      username: tgUser.username ? `@${tgUser.username}` : '',
+      first_name: tgUser.first_name || '',
+      daily_messages: '0',
+      weekly_messages: '0',
+      monthly_messages: '0',
+      total_messages: '0',
+      warns: '0',
+      status: 'active',
+      rest_until: '',
+      rest_reason: '',
+      last_daily_date: todayStr,
+      last_monthly_date: monthStr,
+      last_active: new Date().toISOString()
+    };
+
+    const newRow = await sheets.users.addRow(newUserObj);
+    return rowToObject(newRow);
+  } catch (err) {
+    console.error('Error creating user in Sheets:', err.message);
+    return null;
+  }
 }
 
 /**
  * Increment user's message counters
  */
 export async function incrementUserMessage(tgUser) {
-  const { users } = await getSheets();
-  const rows = await users.getRows();
   const idStr = String(tgUser.id);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const monthStr = new Date().toISOString().slice(0, 7);
 
-  let row = rows.find(r => String(r.get('telegram_id')) === idStr);
+  if (!isSheetsConfigured()) {
+    let u = localUsers.find(x => String(x.telegram_id) === idStr);
+    if (!u) {
+      u = await getOrCreateUser(tgUser);
+    }
+    if (u) {
+      let daily = parseInt(u.daily_messages, 10) || 0;
+      if (u.last_daily_date !== todayStr) {
+        daily = 1;
+        u.last_daily_date = todayStr;
+      } else {
+        daily += 1;
+      }
 
-  if (!row) {
-    const user = await getOrCreateUser(tgUser);
-    // Refresh rows to get the row handle
-    const updatedRows = await users.getRows();
-    row = updatedRows.find(r => String(r.get('telegram_id')) === idStr);
+      let monthly = parseInt(u.monthly_messages, 10) || 0;
+      if (u.last_monthly_date !== monthStr) {
+        monthly = 1;
+        u.last_monthly_date = monthStr;
+      } else {
+        monthly += 1;
+      }
+
+      u.daily_messages = String(daily);
+      u.monthly_messages = String(monthly);
+      u.weekly_messages = String((parseInt(u.weekly_messages, 10) || 0) + 1);
+      u.total_messages = String((parseInt(u.total_messages, 10) || 0) + 1);
+      u.last_active = new Date().toISOString();
+      return u;
+    }
+    return null;
   }
 
-  if (row) {
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const monthStr = new Date().toISOString().slice(0, 7);
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.users.getRows();
+    let row = rows.find(r => String(r.get('telegram_id')) === idStr);
 
-    let daily = parseInt(row.get('daily_messages'), 10) || 0;
-    if (row.get('last_daily_date') !== todayStr) {
-      daily = 1;
-      row.set('last_daily_date', todayStr);
-    } else {
-      daily += 1;
+    if (!row) {
+      await getOrCreateUser(tgUser);
+      const updatedRows = await sheets.users.getRows();
+      row = updatedRows.find(r => String(r.get('telegram_id')) === idStr);
     }
 
-    let monthly = parseInt(row.get('monthly_messages'), 10) || 0;
-    if (row.get('last_monthly_date') !== monthStr) {
-      monthly = 1;
-      row.set('last_monthly_date', monthStr);
-    } else {
-      monthly += 1;
-    }
+    if (row) {
+      let daily = parseInt(row.get('daily_messages'), 10) || 0;
+      if (row.get('last_daily_date') !== todayStr) {
+        daily = 1;
+        row.set('last_daily_date', todayStr);
+      } else {
+        daily += 1;
+      }
 
-    const weekly = (parseInt(row.get('weekly_messages'), 10) || 0) + 1;
-    const total = (parseInt(row.get('total_messages'), 10) || 0) + 1;
-    
-    // Check if rest expired
-    const restUntil = row.get('rest_until');
-    let currentStatus = row.get('status') || 'active';
-    if (restUntil && new Date(restUntil) <= new Date()) {
-      currentStatus = 'active';
-      row.set('rest_until', '');
-      row.set('rest_reason', '');
-    }
+      let monthly = parseInt(row.get('monthly_messages'), 10) || 0;
+      if (row.get('last_monthly_date') !== monthStr) {
+        monthly = 1;
+        row.set('last_monthly_date', monthStr);
+      } else {
+        monthly += 1;
+      }
 
-    row.set('daily_messages', String(daily));
-    row.set('weekly_messages', String(weekly));
-    row.set('monthly_messages', String(monthly));
-    row.set('total_messages', String(total));
-    row.set('status', currentStatus);
-    row.set('last_active', new Date().toISOString());
+      const weekly = (parseInt(row.get('weekly_messages'), 10) || 0) + 1;
+      const total = (parseInt(row.get('total_messages'), 10) || 0) + 1;
 
-    if (tgUser.username && row.get('username') !== `@${tgUser.username}`) {
-      row.set('username', `@${tgUser.username}`);
-    }
-    if (tgUser.first_name && row.get('first_name') !== tgUser.first_name) {
-      row.set('first_name', tgUser.first_name);
-    }
+      row.set('daily_messages', String(daily));
+      row.set('weekly_messages', String(weekly));
+      row.set('monthly_messages', String(monthly));
+      row.set('total_messages', String(total));
+      row.set('last_active', new Date().toISOString());
 
-    await row.save();
-    return rowToObject(row);
+      await row.save();
+      return rowToObject(row);
+    }
+  } catch (err) {
+    console.error('Error incrementing message in Sheets:', err.message);
   }
 
   return null;
@@ -357,46 +556,67 @@ export async function incrementUserMessage(tgUser) {
  * Update user fields by telegramId
  */
 export async function updateUser(telegramId, updates) {
-  const { users } = await getSheets();
-  const rows = await users.getRows();
   const idStr = String(telegramId);
 
-  const row = rows.find(r => String(r.get('telegram_id')) === idStr);
-  if (!row) return null;
-
-  for (const [key, val] of Object.entries(updates)) {
-    row.set(key, val !== null && val !== undefined ? String(val) : '');
+  // Update in local store
+  const localU = localUsers.find(u => String(u.telegram_id) === idStr);
+  if (localU) {
+    for (const [k, v] of Object.entries(updates)) {
+      localU[k] = String(v);
+    }
   }
 
-  await row.save();
-  return rowToObject(row);
+  if (!isSheetsConfigured()) return localU;
+
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.users.getRows();
+    const row = rows.find(r => String(r.get('telegram_id')) === idStr);
+    if (!row) return null;
+
+    for (const [key, val] of Object.entries(updates)) {
+      row.set(key, val !== null && val !== undefined ? String(val) : '');
+    }
+
+    await row.save();
+    return rowToObject(row);
+  } catch (err) {
+    console.error('Error updating user in Sheets:', err.message);
+    return localU;
+  }
 }
 
 /**
  * Reset weekly messages for all active members
  */
 export async function resetWeeklyMessages() {
-  const { users } = await getSheets();
-  const rows = await users.getRows();
-
-  for (const row of rows) {
-    if (row.get('status') !== 'kicked') {
-      row.set('weekly_messages', '0');
-    }
+  for (const u of localUsers) {
+    if (u.status !== 'kicked') u.weekly_messages = '0';
   }
 
-  // Save all rows
-  await Promise.all(rows.map(r => r.save()));
+  if (!isSheetsConfigured()) return;
+
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.users.getRows();
+
+    for (const row of rows) {
+      if (row.get('status') !== 'kicked') {
+        row.set('weekly_messages', '0');
+      }
+    }
+    await Promise.all(rows.map(r => r.save()));
+  } catch (err) {
+    console.error('Error resetting weekly messages in Sheets:', err.message);
+  }
 }
 
 /**
  * Create a new Rest request
  */
 export async function createRestRequest({ telegramId, username, duration, reason, weeklyMsgAtRequest }) {
-  const { rest } = await getSheets();
   const id = `REQ-${Date.now().toString().slice(-6)}`;
-
-  const newRow = await rest.addRow({
+  const reqObj = {
     id,
     telegram_id: String(telegramId),
     username: username || '',
@@ -407,46 +627,81 @@ export async function createRestRequest({ telegramId, username, duration, reason
     created_at: new Date().toISOString(),
     processed_at: '',
     processed_by: ''
-  });
+  };
 
-  return rowToObject(newRow);
+  localRestRequests.push(reqObj);
+
+  if (!isSheetsConfigured()) return reqObj;
+
+  try {
+    const sheets = await getSheets();
+    const newRow = await sheets.rest.addRow(reqObj);
+    return rowToObject(newRow);
+  } catch (err) {
+    console.error('Error creating rest request in Sheets:', err.message);
+    return reqObj;
+  }
 }
 
 /**
  * Get rest request by ID
  */
 export async function getRestRequest(requestId) {
-  const { rest } = await getSheets();
-  const rows = await rest.getRows();
-  const row = rows.find(r => r.get('id') === requestId);
-  return row ? rowToObject(row) : null;
+  const found = localRestRequests.find(r => r.id === requestId);
+  if (!isSheetsConfigured()) return found || null;
+
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.rest.getRows();
+    const row = rows.find(r => r.get('id') === requestId);
+    return row ? rowToObject(row) : (found || null);
+  } catch (err) {
+    return found || null;
+  }
 }
 
 /**
  * Get all rest requests
  */
 export async function getAllRestRequests() {
-  const { rest } = await getSheets();
-  const rows = await rest.getRows();
-  return rows.map(rowToObject);
+  if (!isSheetsConfigured()) return [...localRestRequests];
+
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.rest.getRows();
+    return rows.map(rowToObject);
+  } catch (err) {
+    return [...localRestRequests];
+  }
 }
 
 /**
  * Update rest request status (approved/rejected)
  */
 export async function updateRestRequest(requestId, { status, processedBy }) {
-  const { rest } = await getSheets();
-  const rows = await rest.getRows();
-  const row = rows.find(r => r.get('id') === requestId);
+  const reqLocal = localRestRequests.find(r => r.id === requestId);
+  if (reqLocal) {
+    reqLocal.status = status;
+    reqLocal.processed_at = new Date().toISOString();
+    reqLocal.processed_by = processedBy || '';
+  }
 
-  if (!row) return null;
+  if (!isSheetsConfigured()) return reqLocal;
 
-  row.set('status', status);
-  row.set('processed_at', new Date().toISOString());
-  row.set('processed_by', processedBy || '');
-  await row.save();
+  try {
+    const sheets = await getSheets();
+    const rows = await sheets.rest.getRows();
+    const row = rows.find(r => r.get('id') === requestId);
+    if (!row) return reqLocal;
 
-  return rowToObject(row);
+    row.set('status', status);
+    row.set('processed_at', new Date().toISOString());
+    row.set('processed_by', processedBy || '');
+    await row.save();
+    return rowToObject(row);
+  } catch (err) {
+    return reqLocal;
+  }
 }
 
 /**
@@ -459,7 +714,6 @@ function rowToObject(row) {
     obj[k] = v;
   }
 
-  // Normalize daily and monthly counts for user objects if dates are stale
   if (obj.uid && obj.telegram_id) {
     const todayStr = new Date().toISOString().slice(0, 10);
     const monthStr = new Date().toISOString().slice(0, 7);
