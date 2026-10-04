@@ -202,32 +202,84 @@ function initEventListeners() {
 }
 
 async function loadStats() {
-  try {
-    const res = await fetch('/api/stats');
-    if (!res.ok) throw new Error('Failed to load stats');
-    chatData = await res.json();
+  const isFileProtocol = window.location.protocol === 'file:';
 
-    updateOverview(chatData.chat);
-    startCountdown(chatData.chat.next_clean_date);
-    renderLeaderboard();
+  if (!isFileProtocol) {
+    try {
+      const res = await fetch('/api/stats');
+      if (res.ok) {
+        chatData = await res.json();
+        updateOverview(chatData.chat);
+        startCountdown(chatData.chat.next_clean_date);
+        renderLeaderboard();
 
-    // Check URL parameters for direct user lookup (?id=... or ?uid=...)
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetId = urlParams.get('id') || urlParams.get('uid');
-    if (targetId) {
-      document.getElementById('searchInput').value = targetId;
-      fetchUserProfile(targetId);
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetId = urlParams.get('id') || urlParams.get('uid');
+        if (targetId) {
+          document.getElementById('searchInput').value = targetId;
+          fetchUserProfile(targetId);
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend API unreachable, activating offline Genshin demo preview:', err.message);
     }
-  } catch (err) {
-    console.error('Error loading data:', err);
-    document.getElementById('leaderboardBody').innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align: center; color: var(--accent-red); padding: 2rem;">
-          Помилка підключення до бази даних. Спробуйте пізніше.
-        </td>
-      </tr>
-    `;
   }
+
+  // Fallback demo data for local file preview (Genshin Impact theme)
+  const nextSunday = new Date();
+  nextSunday.setDate(nextSunday.getDate() + ((7 - nextSunday.getDay()) % 7 || 7));
+  nextSunday.setHours(20, 0, 0, 0);
+
+  chatData = {
+    chat: {
+      bound: true,
+      min_messages: 50,
+      clean_day: 0,
+      clean_hour: 20,
+      language: 'ua',
+      total_members: 42,
+      total_weekly_messages: 2480,
+      resting_count: 3,
+      warned_count: 2,
+      next_clean_date: nextSunday.toISOString()
+    },
+    weekly_top: [
+      { uid: '700000001', telegram_id: '101', username: '@lumine', first_name: 'Lumine', daily_messages: 25, weekly_messages: 185, monthly_messages: 450, total_messages: 3200, warns: 0, status: 'active', quota_percent: 370 },
+      { uid: '700000002', telegram_id: '102', username: '@venti_bard', first_name: 'Venti', daily_messages: 18, weekly_messages: 142, monthly_messages: 380, total_messages: 2890, warns: 0, status: 'active', quota_percent: 284 },
+      { uid: '700000003', telegram_id: '103', username: '@raiden_ei', first_name: 'Raiden Shogun', daily_messages: 14, weekly_messages: 110, monthly_messages: 290, total_messages: 1950, warns: 0, status: 'active', quota_percent: 220 },
+      { uid: '700000004', telegram_id: '104', username: '@zhongli_geo', first_name: 'Zhongli', daily_messages: 8, weekly_messages: 75, monthly_messages: 190, total_messages: 1600, warns: 0, status: 'active', quota_percent: 150 },
+      { uid: '700000005', telegram_id: '105', username: '@nahida_kusanali', first_name: 'Nahida', daily_messages: 0, weekly_messages: 20, monthly_messages: 110, total_messages: 840, warns: 0, status: 'rest', rest_until: nextSunday.toISOString(), rest_reason: 'Сесія в Академії', quota_percent: 40 },
+      { uid: '700000006', telegram_id: '106', username: '@furina_de_fontaine', first_name: 'Furina', daily_messages: 3, weekly_messages: 15, monthly_messages: 65, total_messages: 420, warns: 1, status: 'warned', quota_percent: 30 }
+    ],
+    all_time_top: [
+      { uid: '700000001', telegram_id: '101', username: '@lumine', first_name: 'Lumine', daily_messages: 25, weekly_messages: 185, monthly_messages: 450, total_messages: 3200, warns: 0, status: 'active', quota_percent: 370 },
+      { uid: '700000002', telegram_id: '102', username: '@venti_bard', first_name: 'Venti', daily_messages: 18, weekly_messages: 142, monthly_messages: 380, total_messages: 2890, warns: 0, status: 'active', quota_percent: 284 },
+      { uid: '700000003', telegram_id: '103', username: '@raiden_ei', first_name: 'Raiden Shogun', daily_messages: 14, weekly_messages: 110, monthly_messages: 290, total_messages: 1950, warns: 0, status: 'active', quota_percent: 220 }
+    ]
+  };
+
+  updateOverview(chatData.chat);
+  startCountdown(chatData.chat.next_clean_date);
+  renderLeaderboard();
+
+  // Show default profile card for demonstration
+  displayProfileCard({
+    uid: '700000001',
+    telegram_id: '101',
+    username: '@lumine',
+    first_name: 'Lumine',
+    daily_messages: 25,
+    weekly_messages: 185,
+    monthly_messages: 450,
+    total_messages: 3200,
+    quota_min: 50,
+    quota_percent: 370,
+    warns: 0,
+    max_warns: 3,
+    status: 'active',
+    rank: 1
+  });
 }
 
 function updateOverview(chat) {
@@ -336,25 +388,49 @@ async function handleSearch() {
 }
 
 async function fetchUserProfile(query) {
-  try {
-    let url = `/api/stats?id=${encodeURIComponent(query)}`;
-    if (query.startsWith('7000') || !isNaN(Number(query)) && query.length < 10) {
-      url = `/api/stats?uid=${encodeURIComponent(query)}`;
-    } else if (query.startsWith('@')) {
-      url = `/api/stats?username=${encodeURIComponent(query)}`;
-    }
+  const isFileProtocol = window.location.protocol === 'file:';
 
-    const res = await fetch(url);
-    if (!res.ok) {
-      alert(i18n[currentLang].notFound);
+  if (!isFileProtocol) {
+    try {
+      let url = `/api/stats?id=${encodeURIComponent(query)}`;
+      if (query.startsWith('7000') || !isNaN(Number(query)) && query.length < 10) {
+        url = `/api/stats?uid=${encodeURIComponent(query)}`;
+      } else if (query.startsWith('@')) {
+        url = `/api/stats?username=${encodeURIComponent(query)}`;
+      }
+
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        displayProfileCard(data.user);
+        return;
+      }
+    } catch (err) {
+      console.warn('Network fetch failed, searching in loaded data:', err.message);
+    }
+  }
+
+  // Search in currently loaded list
+  if (chatData && chatData.weekly_top) {
+    const cleanQuery = query.toLowerCase().replace(/^@/, '');
+    const found = chatData.weekly_top.find(u => 
+      String(u.telegram_id) === query ||
+      String(u.uid) === query ||
+      (u.username && u.username.toLowerCase().replace(/^@/, '') === cleanQuery) ||
+      (u.first_name && u.first_name.toLowerCase().includes(cleanQuery))
+    );
+
+    if (found) {
+      displayProfileCard({
+        ...found,
+        quota_min: chatData.chat.min_messages,
+        rank: chatData.weekly_top.indexOf(found) + 1
+      });
       return;
     }
-
-    const data = await res.json();
-    displayProfileCard(data.user);
-  } catch (err) {
-    console.error('Error fetching user card:', err);
   }
+
+  alert(i18n[currentLang].notFound);
 }
 
 function displayProfileCard(user) {
